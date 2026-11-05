@@ -1,0 +1,76 @@
+<resources>
+    <string name="app_name">AdShield</string>
+    <string name="vpn_channel_name">AdShield Protection Service</string>
+    <string name="vpn_channel_desc">Active status notification for AdShield local protection</string>
+    <string name="vpn_notification_title">AdShield is Active</string>
+    <string name="vpn_notification_text">Your device traffic is locally protected</string>
+    <string name="vpn_action_stop">Disconnect</string>
+    <string name="vpn_action_reconnect">Reconnect</string>
+
+    <!-- Navigation -->
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_logs">Query Log</string>
+    <string name="nav_apps">Apps</string>
+    <string name="nav_filters">Filters</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_title">AdShield</string>
+    <string name="dashboard_subtitle">DNS-Level Cyber Security</string>
+    <string name="status_protected">PROTECTED</string>
+    <string name="status_inactive">UNPROTECTED</string>
+    <string name="status_connecting">STARTING...</string>
+    <string name="stat_blocked">Ads Blocked</string>
+    <string name="stat_total">Total Queries</string>
+    <string name="stat_percentage">Block Rate</string>
+    <string name="stat_today">Today Blocked</string>
+    <string name="stat_uptime">Protection Time</string>
+    <string name="recent_blocked_title">Recent Blocked Threats</string>
+    <string name="no_threats_yet">No threats detected yet. Turn protection ON.</string>
+
+    <!-- App Selection -->
+    <string name="apps_title">App Protection</string>
+    <string name="apps_subtitle">Exclude specific apps from DNS filtering</string>
+    <string name="search_apps_hint">Search installed apps...</string>
+    <string name="filter_all">All</string>
+    <string name="filter_protected">Protected</string>
+    <string name="filter_excluded">Excluded</string>
+
+    <!-- Query Log -->
+    <string name="logs_title">Live DNS Log</string>
+    <string name="search_logs_hint">Search domain name...</string>
+    <string name="chip_all">All</string>
+    <string name="chip_blocked">Blocked</string>
+    <string name="chip_allowed">Allowed</string>
+    <string name="clear_logs">Clear</string>
+    <string name="no_logs">No DNS queries recorded yet.</string>
+
+    <!-- Filters -->
+    <string name="filters_title">Filter Rules</string>
+    <string name="tab_blacklist">Blacklist</string>
+    <string name="tab_whitelist">Whitelist</string>
+    <string name="tab_community">Built-in Lists</string>
+    <string name="add_rule">Add Domain</string>
+    <string name="enter_domain_hint">e.g. tracking.example.com</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="theme_title">Theme Mode</string>
+    <string name="dns_provider_title">Upstream DNS Provider</string>
+    <string name="youtube_shield_title">YouTube Ad Shield</string>
+    <string name="spotify_shield_title">Spotify Ad Shield</string>
+    <string name="boot_startup_title">Start on Device Boot</string>
+    <string name="battery_optim_title">Battery Optimization</string>
+    <string name="about_title">About AdShield</string>
+    <string name="version_label">Version 2.0.0 (Java Edition)</string>
+    <!-- Outside-App Auto Skipper & Accessibility -->
+    <string name="accessibility_service_label">AdShield Outside-App Ad Skipper</string>
+    <string name="accessibility_service_desc">Automatically detects and skips video ads, and mutes ad audio in YouTube, JioHotstar, and other streaming apps outside AdShield.</string>
+    <string name="outside_skipper_title">Outside-App Ad Skipper</string>
+    <string name="outside_skipper_desc">Auto-skips video ads in official YouTube and JioHotstar apps</string>
+    <string name="outside_mute_title">Instant Ad Mute</string>
+    <string name="outside_mute_desc">Mutes media volume during unskippable ad segments</string>
+    <string name="stat_auto_skipped">Ads Auto-Skipped</string>
+    <string name="cyber_hub_title">Ad-Free Cyber Hub</string>
+    <string name="cyber_hub_desc">Watch YouTube, Hotstar &amp; Spotify with 100% Brave scriptlet blocking</string>
+</resources>

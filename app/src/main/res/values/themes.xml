@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.AdShield" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/brand_primary</item>
+        <item name="colorSecondary">@color/brand_secondary</item>
+        <item name="android:statusBarColor">@color/bg_light</item>
+        <item name="android:navigationBarColor">@color/bg_light</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:windowBackground">@color/bg_light</item>
+
+        <!-- Custom semantic theme colors (Light Mode) -->
+        <item name="theme_bg">@color/bg_light</item>
+        <item name="theme_surface">@color/surface_light</item>
+        <item name="theme_card">@color/card_light</item>
+        <item name="theme_border">@color/border_light</item>
+        <item name="theme_text_primary">@color/text_primary_light</item>
+        <item name="theme_text_secondary">@color/text_secondary_light</item>
+        <item name="theme_text_muted">@color/text_muted_light</item>
+        <item name="theme_accent">@color/brand_primary</item>
+        <item name="theme_secondary">@color/brand_secondary</item>
+    </style>
+</resources>

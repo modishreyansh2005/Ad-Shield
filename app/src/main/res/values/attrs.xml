@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="theme_bg" format="color" />
+    <attr name="theme_surface" format="color" />
+    <attr name="theme_card" format="color" />
+    <attr name="theme_border" format="color" />
+    <attr name="theme_text_primary" format="color" />
+    <attr name="theme_text_secondary" format="color" />
+    <attr name="theme_text_muted" format="color" />
+    <attr name="theme_accent" format="color" />
+    <attr name="theme_secondary" format="color" />
+</resources>

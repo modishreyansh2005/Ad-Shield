@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.AdShield" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/brand_primary_dark</item>
+        <item name="colorSecondary">@color/brand_secondary_dark</item>
+        <item name="android:statusBarColor">@color/bg_dark</item>
+        <item name="android:navigationBarColor">@color/bg_dark</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowBackground">@color/bg_dark</item>
+
+        <!-- Custom semantic theme colors (Dark Mode) -->
+        <item name="theme_bg">@color/bg_dark</item>
+        <item name="theme_surface">@color/surface_dark</item>
+        <item name="theme_card">@color/card_dark</item>
+        <item name="theme_border">@color/border_dark</item>
+        <item name="theme_text_primary">@color/text_primary_dark</item>
+        <item name="theme_text_secondary">@color/text_secondary_dark</item>
+        <item name="theme_text_muted">@color/text_muted_dark</item>
+        <item name="theme_accent">@color/brand_primary_dark</item>
+        <item name="theme_secondary">@color/brand_secondary_dark</item>
+    </style>
+</resources>
