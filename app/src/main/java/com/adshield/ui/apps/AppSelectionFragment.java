@@ -39,8 +39,6 @@ public class AppSelectionFragment extends Fragment {
     private static final Set<String> HIGHLIGHTED_PACKAGES = new HashSet<>(Arrays.asList(
             "com.google.android.youtube",
             "com.spotify.music",
-            "in.startv.hotstar",
-            "com.jio.media.ondemand",
             "com.instagram.android",
             "com.facebook.katana",
             "com.android.chrome"

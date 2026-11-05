@@ -22,7 +22,6 @@ public class AppStatusDialog extends DialogFragment {
 
     public enum AppTarget {
         YOUTUBE,
-        HOTSTAR,
         SPOTIFY
     }
 
@@ -75,15 +74,6 @@ public class AppStatusDialog extends DialogFragment {
                     "AdShield filters advertising, telemetry, and tracking endpoints (such as doubleclick.net, googlesyndication.com, adservice.google.com, imasdk.googleapis.com) at the DNS level.\n\n" +
                     "To prevent video playback interruptions, legitimate media streams (googlevideo.com) and core login services are intentionally preserved."
             );
-        } else if (target == AppTarget.HOTSTAR) {
-            binding.dialogAppIcon.setImageResource(R.drawable.ic_hotstar);
-            binding.dialogAppTitle.setText("JioHotstar Ad Shield");
-            long blocked = prefs.getHotstarBlockedCount();
-            binding.dialogAppBlockedCount.setText(String.format(Locale.US, "%,d Requests Sinkholed", blocked));
-            binding.dialogAppDescription.setText(
-                    "AdShield filters video ad networks, VAST trackers, and companion telemetry for Hotstar and JioCinema (including ads.hotstar.com, adengine.hotstar.com, jioads.com, vserve.mobi, imasdk.googleapis.com).\n\n" +
-                    "Essential live sports streams (cricket), movies, and media CDNs (*.hotstar-cdn.net) are strictly whitelisted so playback never buffers or freezes."
-            );
         } else {
             binding.dialogAppIcon.setImageResource(R.drawable.ic_spotify);
             binding.dialogAppTitle.setText("Spotify Ad Shield");
@@ -97,9 +87,7 @@ public class AppStatusDialog extends DialogFragment {
 
         binding.dialogBtnLaunchHub.setOnClickListener(v -> {
             String targetExtra = com.adshield.ui.player.CyberPlayerActivity.TARGET_YOUTUBE;
-            if (target == AppTarget.HOTSTAR) {
-                targetExtra = com.adshield.ui.player.CyberPlayerActivity.TARGET_HOTSTAR;
-            } else if (target == AppTarget.SPOTIFY) {
+            if (target == AppTarget.SPOTIFY) {
                 targetExtra = com.adshield.ui.player.CyberPlayerActivity.TARGET_SPOTIFY;
             }
             android.content.Intent intent = new android.content.Intent(requireContext(), com.adshield.ui.player.CyberPlayerActivity.class);

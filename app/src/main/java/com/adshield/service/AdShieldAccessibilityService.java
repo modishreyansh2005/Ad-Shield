@@ -21,7 +21,7 @@ import java.util.Set;
 /**
  * AdShield Smart Accessibility Service.
  * Runs in the background and applies Brave Browser ad-defusing logic outside of AdShield:
- * 1. Automatically detects video ads in YouTube, JioHotstar, and Spotify.
+ * 1. Automatically detects video ads in supported streaming apps.
  * 2. Clicks "Skip Ad" the exact millisecond it becomes available.
  * 3. Instantly mutes the media audio stream during unskippable ad segments.
  * 4. Dismisses promotional banner overlays.
@@ -35,8 +35,6 @@ public class AdShieldAccessibilityService extends AccessibilityService {
             "com.google.android.youtube",
             "com.google.android.apps.youtube.music",
             "com.google.android.youtube.tv",
-            "in.startv.hotstar",
-            "com.jio.media.ondemand",
             "com.spotify.music"
     ));
 
@@ -45,13 +43,6 @@ public class AdShieldAccessibilityService extends AccessibilityService {
             "com.google.android.youtube:id/modern_skip_ad_button",
             "com.google.android.youtube:id/skip_ad_button_text",
             "com.google.android.youtube:id/ad_skip_button"
-    };
-
-    private static final String[] HOTSTAR_SKIP_IDS = {
-            "in.startv.hotstar:id/ad_skip_button",
-            "in.startv.hotstar:id/btn_skip",
-            "in.startv.hotstar:id/skip_ad",
-            "in.startv.hotstar:id/skip_button"
     };
 
     private static final String[] OVERLAY_CLOSE_IDS = {
@@ -104,9 +95,6 @@ public class AdShieldAccessibilityService extends AccessibilityService {
 
             // 1. Check for Skip Ad Buttons by View ID
             boolean skipped = checkAndClickByIds(rootNode, YOUTUBE_SKIP_IDS);
-            if (!skipped) {
-                skipped = checkAndClickByIds(rootNode, HOTSTAR_SKIP_IDS);
-            }
 
             // 2. Check for Skip Ad Buttons by Text
             if (!skipped) {

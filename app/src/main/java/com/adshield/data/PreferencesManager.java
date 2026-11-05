@@ -31,6 +31,8 @@ public class PreferencesManager {
     private static final String KEY_AUTO_SKIPPER_ENABLED = "key_auto_skipper_enabled";
     private static final String KEY_AUTO_MUTE_ADS_ENABLED = "key_auto_mute_ads_enabled";
     private static final String KEY_AUTO_SKIPPED_ADS_COUNT = "key_auto_skipped_ads_count";
+    private static final String KEY_AD_BLOCKER_ENABLED = "key_ad_blocker_enabled";
+    private static final String KEY_TRACKER_SHIELD_ENABLED = "key_tracker_shield_enabled";
 
     private final SharedPreferences prefs;
 
@@ -60,6 +62,22 @@ public class PreferencesManager {
 
     public void setBlockMaliciousDomains(boolean block) {
         prefs.edit().putBoolean(KEY_BLOCK_MALICIOUS, block).apply();
+    }
+
+    public boolean isAdBlockerEnabled() {
+        return prefs.getBoolean(KEY_AD_BLOCKER_ENABLED, true);
+    }
+
+    public void setAdBlockerEnabled(boolean enabled) {
+        prefs.edit().putBoolean(KEY_AD_BLOCKER_ENABLED, enabled).apply();
+    }
+
+    public boolean isTrackerShieldEnabled() {
+        return prefs.getBoolean(KEY_TRACKER_SHIELD_ENABLED, true);
+    }
+
+    public void setTrackerShieldEnabled(boolean enabled) {
+        prefs.edit().putBoolean(KEY_TRACKER_SHIELD_ENABLED, enabled).apply();
     }
 
     public long getBlockedRequestsCount() {

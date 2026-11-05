@@ -105,21 +105,6 @@
                 app:strokeWidth="1dp" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_tab_hotstar"
-                style="@style/Widget.Material3.Button.TonalButton"
-                android:layout_width="wrap_content"
-                android:layout_height="38dp"
-                android:layout_marginEnd="8dp"
-                android:text="JioHotstar"
-                android:textColor="#FFFFFF"
-                android:textSize="12sp"
-                app:backgroundTint="#2000E5FF"
-                app:cornerRadius="19dp"
-                app:icon="@drawable/ic_hotstar"
-                app:strokeColor="#00E5FF"
-                app:strokeWidth="1dp" />
-
-            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_tab_spotify"
                 style="@style/Widget.Material3.Button.TonalButton"
                 android:layout_width="wrap_content"

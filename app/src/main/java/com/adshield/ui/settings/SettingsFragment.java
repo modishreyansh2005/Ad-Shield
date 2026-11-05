@@ -18,6 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 
+import com.adshield.R;
 import com.adshield.data.PreferencesManager;
 import com.adshield.databinding.FragmentSettingsBinding;
 import com.adshield.service.AdShieldVpnService;
@@ -44,8 +45,6 @@ public class SettingsFragment extends Fragment {
         setupDnsPicker();
         setupShieldSwitches();
         setupOutsideSkipperSettings();
-        setupBootSwitch();
-        setupBatteryOptimization();
         setupResetButton();
     }
 
@@ -65,7 +64,7 @@ public class SettingsFragment extends Fragment {
             try {
                 Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
                 startActivity(intent);
-                Toast.makeText(requireContext(), "Turn ON 'AdShield Outside-App Ad Skipper'", Toast.LENGTH_LONG).show();
+                Toast.makeText(requireContext(), "Turn ON 'AdShield Video Ad Auto-Skipper'", Toast.LENGTH_LONG).show();
             } catch (Exception e) {
                 Toast.makeText(requireContext(), "Could not open Accessibility Settings", Toast.LENGTH_SHORT).show();
             }
@@ -73,14 +72,14 @@ public class SettingsFragment extends Fragment {
     }
 
     private void updateAccessibilitySummary() {
-        if (getContext() == null) return;
+        if (getContext() == null || binding == null) return;
         boolean isRunning = PreferencesManager.isAccessibilityServiceRunning(getContext());
         if (isRunning) {
             binding.tvAccessibilityServiceStatus.setText("Granted & Active • Auto-Skipping Running");
-            binding.tvAccessibilityServiceStatus.setTextColor(requireContext().getColor(com.adshield.R.color.cyber_neon_green));
+            binding.tvAccessibilityServiceStatus.setTextColor(requireContext().getColor(R.color.brand_secondary));
         } else {
             binding.tvAccessibilityServiceStatus.setText("Permission Required • Tap to enable in Settings");
-            binding.tvAccessibilityServiceStatus.setTextColor(requireContext().getColor(com.adshield.R.color.status_warning));
+            binding.tvAccessibilityServiceStatus.setTextColor(requireContext().getColor(R.color.status_warning));
         }
     }
 
@@ -201,43 +200,9 @@ public class SettingsFragment extends Fragment {
             prefsManager.setYouTubeProtectionEnabled(isChecked);
         });
 
-        binding.switchHotstarShield.setChecked(prefsManager.isHotstarProtectionEnabled());
-        binding.switchHotstarShield.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            prefsManager.setHotstarProtectionEnabled(isChecked);
-        });
-
         binding.switchSpotifyShield.setChecked(prefsManager.isSpotifyProtectionEnabled());
         binding.switchSpotifyShield.setOnCheckedChangeListener((buttonView, isChecked) -> {
             prefsManager.setSpotifyProtectionEnabled(isChecked);
-        });
-    }
-
-    private void setupBootSwitch() {
-        binding.switchBootStartup.setChecked(prefsManager.isStartOnBoot());
-        binding.switchBootStartup.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            prefsManager.setStartOnBoot(isChecked);
-        });
-    }
-
-    private void setupBatteryOptimization() {
-        binding.cardBatteryOptim.setOnClickListener(v -> {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                Intent intent = new Intent();
-                String packageName = requireContext().getPackageName();
-                PowerManager pm = (PowerManager) requireContext().getSystemService(Context.POWER_SERVICE);
-                if (pm != null && !pm.isIgnoringBatteryOptimizations(packageName)) {
-                    intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-                    intent.setData(Uri.parse("package:" + packageName));
-                    try {
-                        startActivity(intent);
-                    } catch (Exception e) {
-                        intent.setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
-                        startActivity(intent);
-                    }
-                } else {
-                    Toast.makeText(requireContext(), "AdShield is already exempted from battery optimization.", Toast.LENGTH_SHORT).show();
-                }
-            }
         });
     }
 

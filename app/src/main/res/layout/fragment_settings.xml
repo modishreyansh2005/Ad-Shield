@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="20dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -21,11 +21,20 @@
             android:textSize="22sp"
             android:textStyle="bold" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="System configuration and filtering rules"
+            android:textColor="?attr/theme_text_muted"
+            android:textSize="12sp" />
+
         <!-- Appearance Section -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="22dp"
+            android:letterSpacing="0.05"
             android:text="APPEARANCE"
             android:textColor="@color/brand_primary"
             android:textSize="12sp"
@@ -40,7 +49,7 @@
             android:focusable="true"
             android:foreground="?attr/selectableItemBackground"
             app:cardBackgroundColor="?attr/theme_card"
-            app:cardCornerRadius="14dp"
+            app:cardCornerRadius="16dp"
             app:cardElevation="0.5dp"
             app:strokeColor="?attr/theme_border"
             app:strokeWidth="1dp">
@@ -80,8 +89,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Change &gt;"
-                    android:textColor="?attr/theme_accent"
-                    android:textSize="13sp" />
+                    android:textColor="@color/brand_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -89,7 +99,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="22dp"
+            android:letterSpacing="0.05"
             android:text="NETWORK &amp; UPSTREAM DNS"
             android:textColor="@color/brand_primary"
             android:textSize="12sp"
@@ -104,7 +115,7 @@
             android:focusable="true"
             android:foreground="?attr/selectableItemBackground"
             app:cardBackgroundColor="?attr/theme_card"
-            app:cardCornerRadius="14dp"
+            app:cardCornerRadius="16dp"
             app:cardElevation="0.5dp"
             app:strokeColor="?attr/theme_border"
             app:strokeWidth="1dp">
@@ -144,17 +155,19 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Select &gt;"
-                    android:textColor="?attr/theme_accent"
-                    android:textSize="13sp" />
+                    android:textColor="@color/brand_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- App Protection Section -->
+        <!-- Specialized Streaming Protection Section -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="SPECIALIZED APP SHIELDS"
+            android:layout_marginTop="22dp"
+            android:letterSpacing="0.05"
+            android:text="SPECIALIZED STREAM FILTERING"
             android:textColor="@color/brand_primary"
             android:textSize="12sp"
             android:textStyle="bold" />
@@ -165,7 +178,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             app:cardBackgroundColor="?attr/theme_card"
-            app:cardCornerRadius="14dp"
+            app:cardCornerRadius="16dp"
             app:cardElevation="0.5dp"
             app:strokeColor="?attr/theme_border"
             app:strokeWidth="1dp">
@@ -186,7 +199,7 @@
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="14dp"
                     android:layout_weight="1"
                     android:orientation="vertical">
 
@@ -202,7 +215,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:text="Filter ad/tracking telemetry safely"
+                        android:text="Filter ad/tracking telemetry endpoints"
                         android:textColor="?attr/theme_text_muted"
                         android:textSize="12sp" />
                 </LinearLayout>
@@ -215,68 +228,13 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- JioHotstar Switch Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:cardBackgroundColor="?attr/theme_card"
-            app:cardCornerRadius="14dp"
-            app:cardElevation="0.5dp"
-            app:strokeColor="?attr/theme_border"
-            app:strokeWidth="1dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="16dp">
-
-                <ImageView
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:src="@drawable/ic_hotstar" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="JioHotstar Ad Shield"
-                        android:textColor="?attr/theme_text_primary"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="Filter video ad networks &amp; telemetry"
-                        android:textColor="?attr/theme_text_muted"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/switch_hotstar_shield"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
         <!-- Spotify Switch Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             app:cardBackgroundColor="?attr/theme_card"
-            app:cardCornerRadius="14dp"
+            app:cardCornerRadius="16dp"
             app:cardElevation="0.5dp"
             app:strokeColor="?attr/theme_border"
             app:strokeWidth="1dp">
@@ -297,7 +255,7 @@
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="14dp"
                     android:layout_weight="1"
                     android:orientation="vertical">
 
@@ -326,13 +284,14 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Outside-App Protection (Brave Logic for Native Apps) -->
+        <!-- Video Ad Auto-Skipper (Optional Accessibility Automation) -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="OUTSIDE-APP AD PROTECTION (BRAVE LOGIC)"
-            android:textColor="@color/cyber_cyan"
+            android:layout_marginTop="22dp"
+            android:letterSpacing="0.05"
+            android:text="VIDEO AD AUTO-SKIPPER (ACCESSIBILITY)"
+            android:textColor="@color/brand_primary"
             android:textSize="12sp"
             android:textStyle="bold" />
 
@@ -342,7 +301,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             app:cardBackgroundColor="?attr/theme_card"
-            app:cardCornerRadius="14dp"
+            app:cardCornerRadius="16dp"
             app:cardElevation="0.5dp"
             app:strokeColor="?attr/theme_border"
             app:strokeWidth="1dp">
@@ -358,12 +317,12 @@
                     android:layout_width="28dp"
                     android:layout_height="28dp"
                     android:src="@drawable/ic_shield_check"
-                    app:tint="@color/cyber_cyan" />
+                    app:tint="@color/brand_primary" />
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="14dp"
                     android:layout_weight="1"
                     android:orientation="vertical">
 
@@ -398,7 +357,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             app:cardBackgroundColor="?attr/theme_card"
-            app:cardCornerRadius="14dp"
+            app:cardCornerRadius="16dp"
             app:cardElevation="0.5dp"
             app:strokeColor="?attr/theme_border"
             app:strokeWidth="1dp">
@@ -414,12 +373,12 @@
                     android:layout_width="28dp"
                     android:layout_height="28dp"
                     android:src="@drawable/ic_block"
-                    app:tint="@color/cyber_neon_green" />
+                    app:tint="@color/brand_secondary" />
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="14dp"
                     android:layout_weight="1"
                     android:orientation="vertical">
 
@@ -448,7 +407,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Accessibility Service Permission Setup Card -->
+        <!-- Accessibility Service Permission Card -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_accessibility_settings"
             android:layout_width="match_parent"
@@ -458,7 +417,7 @@
             android:focusable="true"
             android:foreground="?attr/selectableItemBackground"
             app:cardBackgroundColor="?attr/theme_card"
-            app:cardCornerRadius="14dp"
+            app:cardCornerRadius="16dp"
             app:cardElevation="0.5dp"
             app:strokeColor="?attr/theme_border"
             app:strokeWidth="1dp">
@@ -498,129 +457,18 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Open &gt;"
-                    android:textColor="?attr/theme_accent"
-                    android:textSize="13sp" />
+                    android:textColor="@color/brand_primary"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- System & Protection Section -->
+        <!-- Data & Privacy Section -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="SYSTEM &amp; RELIABILITY"
-            android:textColor="@color/brand_primary"
-            android:textSize="12sp"
-            android:textStyle="bold" />
-
-        <!-- Start on Boot Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:cardBackgroundColor="?attr/theme_card"
-            app:cardCornerRadius="14dp"
-            app:cardElevation="0.5dp"
-            app:strokeColor="?attr/theme_border"
-            app:strokeWidth="1dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="16dp">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/boot_startup_title"
-                        android:textColor="?attr/theme_text_primary"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="Automatically resume protection on boot"
-                        android:textColor="?attr/theme_text_muted"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/switch_boot_startup"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="false" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Battery Optimization Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/card_battery_optim"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackground"
-            app:cardBackgroundColor="?attr/theme_card"
-            app:cardCornerRadius="14dp"
-            app:cardElevation="0.5dp"
-            app:strokeColor="?attr/theme_border"
-            app:strokeWidth="1dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="16dp">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/battery_optim_title"
-                        android:textColor="?attr/theme_text_primary"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="Ensure background service isn't killed by OS"
-                        android:textColor="?attr/theme_text_muted"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Open &gt;"
-                    android:textColor="?attr/theme_accent"
-                    android:textSize="13sp" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Reset & Data Section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="22dp"
+            android:letterSpacing="0.05"
             android:text="DATA &amp; PRIVACY"
             android:textColor="@color/brand_primary"
             android:textSize="12sp"

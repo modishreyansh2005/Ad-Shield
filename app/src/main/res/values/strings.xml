@@ -16,10 +16,10 @@
 
     <!-- Dashboard -->
     <string name="dashboard_title">AdShield</string>
-    <string name="dashboard_subtitle">DNS-Level Cyber Security</string>
+    <string name="dashboard_subtitle">DNS-Level Network Security</string>
     <string name="status_protected">PROTECTED</string>
     <string name="status_inactive">UNPROTECTED</string>
-    <string name="status_connecting">STARTING...</string>
+    <string name="status_connecting">CONNECTING...</string>
     <string name="stat_blocked">Ads Blocked</string>
     <string name="stat_total">Total Queries</string>
     <string name="stat_percentage">Block Rate</string>
@@ -63,14 +63,15 @@
     <string name="battery_optim_title">Battery Optimization</string>
     <string name="about_title">About AdShield</string>
     <string name="version_label">Version 2.0.0 (Java Edition)</string>
-    <!-- Outside-App Auto Skipper & Accessibility -->
-    <string name="accessibility_service_label">AdShield Outside-App Ad Skipper</string>
-    <string name="accessibility_service_desc">Automatically detects and skips video ads, and mutes ad audio in YouTube, JioHotstar, and other streaming apps outside AdShield.</string>
-    <string name="outside_skipper_title">Outside-App Ad Skipper</string>
-    <string name="outside_skipper_desc">Auto-skips video ads in official YouTube and JioHotstar apps</string>
+
+    <!-- Video Ad Skipper & Accessibility -->
+    <string name="accessibility_service_label">AdShield Video Ad Auto-Skipper</string>
+    <string name="accessibility_service_desc">Automatically detects and skips video ads, and mutes ad audio in supported streaming apps outside AdShield.</string>
+    <string name="outside_skipper_title">Auto-Skip Video Ads</string>
+    <string name="outside_skipper_desc">Automatically clicks Skip Ad the exact millisecond it appears</string>
     <string name="outside_mute_title">Instant Ad Mute</string>
     <string name="outside_mute_desc">Mutes media volume during unskippable ad segments</string>
     <string name="stat_auto_skipped">Ads Auto-Skipped</string>
     <string name="cyber_hub_title">Ad-Free Cyber Hub</string>
-    <string name="cyber_hub_desc">Watch YouTube, Hotstar &amp; Spotify with 100% Brave scriptlet blocking</string>
+    <string name="cyber_hub_desc">Watch streaming content with enhanced scriptlet blocking</string>
 </resources>

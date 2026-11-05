@@ -1,6 +1,8 @@
 package com.adshield.ui.dashboard;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -21,7 +23,6 @@ import com.adshield.data.model.DnsLogEntry;
 import com.adshield.data.model.VpnState;
 import com.adshield.databinding.FragmentDashboardBinding;
 import com.adshield.service.AdShieldVpnService;
-import com.adshield.ui.dialogs.AppStatusDialog;
 import com.adshield.ui.logs.QueryLogAdapter;
 
 import java.util.List;
@@ -65,24 +66,8 @@ public class DashboardFragment extends Fragment {
     }
 
     private void setupClickListeners() {
-        binding.btnPower.setOnClickListener(v -> {
-            VpnState currentState = AdShieldVpnService.getVpnStateLiveData().getValue();
-            if (currentState == VpnState.CONNECTED || currentState == VpnState.CONNECTING) {
-                if (getActivity() instanceof MainActivity) {
-                    ((MainActivity) getActivity()).stopProtection();
-                }
-            } else {
-                if (getActivity() instanceof MainActivity) {
-                    ((MainActivity) getActivity()).startProtection();
-                }
-            }
-        });
-
-        binding.btnQuickSettings.setOnClickListener(v -> {
-            if (getActivity() instanceof MainActivity) {
-                ((MainActivity) getActivity()).navigateTo(R.id.nav_settings);
-            }
-        });
+        binding.btnPower.setOnClickListener(v -> toggleProtection());
+        binding.btnToggleProtection.setOnClickListener(v -> toggleProtection());
 
         binding.btnViewAllLogs.setOnClickListener(v -> {
             if (getActivity() instanceof MainActivity) {
@@ -90,36 +75,27 @@ public class DashboardFragment extends Fragment {
             }
         });
 
-        binding.cardYoutubeStatus.setOnClickListener(v -> {
-            AppStatusDialog.show(getChildFragmentManager(), AppStatusDialog.AppTarget.YOUTUBE);
-        });
-
-        binding.cardHotstarStatus.setOnClickListener(v -> {
-            AppStatusDialog.show(getChildFragmentManager(), AppStatusDialog.AppTarget.HOTSTAR);
-        });
-
-        binding.cardSpotifyStatus.setOnClickListener(v -> {
-            AppStatusDialog.show(getChildFragmentManager(), AppStatusDialog.AppTarget.SPOTIFY);
-        });
-
-        binding.btnSetupSkipper.setOnClickListener(v -> openAccessibilitySettings());
-        binding.cardOutsideSkipper.setOnClickListener(v -> openAccessibilitySettings());
-
-        binding.cardLaunchCyberHub.setOnClickListener(v -> {
-            android.content.Intent intent = new android.content.Intent(requireContext(), com.adshield.ui.player.CyberPlayerActivity.class);
-            startActivity(intent);
-        });
+        binding.cardStreamingHub.setOnClickListener(v -> openStreamingHub(com.adshield.ui.player.CyberPlayerActivity.TARGET_YOUTUBE));
+        binding.btnLaunchYoutube.setOnClickListener(v -> openStreamingHub(com.adshield.ui.player.CyberPlayerActivity.TARGET_YOUTUBE));
+        binding.btnLaunchSpotify.setOnClickListener(v -> openStreamingHub(com.adshield.ui.player.CyberPlayerActivity.TARGET_SPOTIFY));
     }
 
-    private void openAccessibilitySettings() {
-        try {
-            android.content.Intent intent = new android.content.Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS);
-            startActivity(intent);
-            android.widget.Toast.makeText(requireContext(),
-                    "Find and turn ON 'AdShield Outside-App Ad Skipper'",
-                    android.widget.Toast.LENGTH_LONG).show();
-        } catch (Exception e) {
-            android.widget.Toast.makeText(requireContext(), "Unable to open Accessibility Settings", android.widget.Toast.LENGTH_SHORT).show();
+    private void openStreamingHub(String target) {
+        android.content.Intent intent = new android.content.Intent(requireContext(), com.adshield.ui.player.CyberPlayerActivity.class);
+        intent.putExtra(com.adshield.ui.player.CyberPlayerActivity.EXTRA_TARGET, target);
+        startActivity(intent);
+    }
+
+    private void toggleProtection() {
+        VpnState currentState = AdShieldVpnService.getVpnStateLiveData().getValue();
+        if (currentState == VpnState.CONNECTED || currentState == VpnState.CONNECTING) {
+            if (getActivity() instanceof MainActivity) {
+                ((MainActivity) getActivity()).stopProtection();
+            }
+        } else {
+            if (getActivity() instanceof MainActivity) {
+                ((MainActivity) getActivity()).startProtection();
+            }
         }
     }
 
@@ -131,43 +107,66 @@ public class DashboardFragment extends Fragment {
     }
 
     private void observeCounts() {
-        AdShieldVpnService.getBlockedCountLiveData().observe(getViewLifecycleOwner(), count -> {
-            refreshStats();
-        });
-
-        AdShieldVpnService.getTotalQueriesLiveData().observe(getViewLifecycleOwner(), total -> {
-            refreshStats();
-        });
+        AdShieldVpnService.getBlockedCountLiveData().observe(getViewLifecycleOwner(), count -> refreshStats());
+        AdShieldVpnService.getTotalQueriesLiveData().observe(getViewLifecycleOwner(), total -> refreshStats());
     }
 
     private void updateVpnStateUi(VpnState state) {
+        if (!isAdded() || binding == null) return;
+        Context ctx = requireContext();
+
         switch (state) {
             case CONNECTED:
                 binding.btnPower.setBackgroundResource(R.drawable.bg_power_button_on);
                 binding.viewGlowRing.setVisibility(View.VISIBLE);
                 binding.tvProtectionStatus.setText(R.string.status_protected);
-                binding.tvProtectionStatus.setTextColor(requireContext().getColor(R.color.brand_secondary));
+                binding.tvProtectionStatus.setBackgroundResource(R.drawable.bg_badge_success);
+                binding.tvProtectionStatus.setTextColor(ctx.getColor(R.color.brand_secondary));
+
+                binding.btnToggleProtection.setText("Turn off protection");
+                binding.btnToggleProtection.setIconResource(R.drawable.ic_power);
+                binding.btnToggleProtection.setBackgroundColor(Color.parseColor("#1A253A"));
+                binding.btnToggleProtection.setStrokeColor(ColorStateList.valueOf(ctx.getColor(R.color.status_blocked)));
+                binding.btnToggleProtection.setStrokeWidth(2);
+                binding.btnToggleProtection.setTextColor(ctx.getColor(R.color.status_blocked));
+                binding.btnToggleProtection.setIconTint(ColorStateList.valueOf(ctx.getColor(R.color.status_blocked)));
                 break;
             case CONNECTING:
                 binding.btnPower.setBackgroundResource(R.drawable.bg_power_button_off);
                 binding.viewGlowRing.setVisibility(View.GONE);
                 binding.tvProtectionStatus.setText(R.string.status_connecting);
-                binding.tvProtectionStatus.setTextColor(requireContext().getColor(R.color.status_warning));
+                binding.tvProtectionStatus.setBackgroundResource(R.drawable.bg_badge_warning);
+                binding.tvProtectionStatus.setTextColor(ctx.getColor(R.color.status_warning));
                 binding.tvProtectionUptime.setText("Configuring secure DNS routing...");
+
+                binding.btnToggleProtection.setText("Connecting...");
+                binding.btnToggleProtection.setIconResource(R.drawable.ic_shield_check);
+                binding.btnToggleProtection.setBackgroundColor(ctx.getColor(R.color.brand_secondary));
+                binding.btnToggleProtection.setStrokeWidth(0);
+                binding.btnToggleProtection.setTextColor(Color.parseColor("#0B1220"));
+                binding.btnToggleProtection.setIconTint(ColorStateList.valueOf(Color.parseColor("#0B1220")));
                 break;
             case DISCONNECTED:
             default:
                 binding.btnPower.setBackgroundResource(R.drawable.bg_power_button_off);
                 binding.viewGlowRing.setVisibility(View.GONE);
                 binding.tvProtectionStatus.setText(R.string.status_inactive);
-                binding.tvProtectionStatus.setTextColor(requireContext().getColor(R.color.status_warning));
-                binding.tvProtectionUptime.setText("Tap to enable system-wide ad protection");
+                binding.tvProtectionStatus.setBackgroundResource(R.drawable.bg_badge_warning);
+                binding.tvProtectionStatus.setTextColor(ctx.getColor(R.color.status_warning));
+                binding.tvProtectionUptime.setText("Tap below to activate system-wide protection");
+
+                binding.btnToggleProtection.setText("Turn on protection");
+                binding.btnToggleProtection.setIconResource(R.drawable.ic_shield_check);
+                binding.btnToggleProtection.setBackgroundColor(ctx.getColor(R.color.brand_secondary));
+                binding.btnToggleProtection.setStrokeWidth(0);
+                binding.btnToggleProtection.setTextColor(Color.parseColor("#0B1220"));
+                binding.btnToggleProtection.setIconTint(ColorStateList.valueOf(Color.parseColor("#0B1220")));
                 break;
         }
     }
 
     public void refreshStats() {
-        if (!isAdded()) return;
+        if (!isAdded() || binding == null) return;
 
         long blocked = prefsManager.getBlockedRequestsCount();
         long total = prefsManager.getTotalQueriesCount();
@@ -181,30 +180,17 @@ public class DashboardFragment extends Fragment {
         long[] today = dbHelper.getTodayCounts();
         binding.tvStatToday.setText(String.format(Locale.US, "%,d", today[1]));
 
-        long ytCount = prefsManager.getYouTubeBlockedCount();
-        binding.tvYtBlockedCount.setText(String.format(Locale.US, "%d blocked", ytCount));
-
-        long hotstarCount = prefsManager.getHotstarBlockedCount();
-        binding.tvHotstarBlockedCount.setText(String.format(Locale.US, "%d blocked", hotstarCount));
-
-        long spCount = prefsManager.getSpotifyBlockedCount();
-        binding.tvSpotifyBlockedCount.setText(String.format(Locale.US, "%d blocked", spCount));
-
-        // Outside-App Skipper Status
-        boolean isSkipperRunning = PreferencesManager.isAccessibilityServiceRunning(requireContext());
-        if (isSkipperRunning) {
-            binding.tvSkipperStatusBadge.setText("ACTIVE • Auto-Skipping Outside Apps");
-            binding.tvSkipperStatusBadge.setTextColor(requireContext().getColor(R.color.cyber_neon_green));
-            binding.btnSetupSkipper.setText("Outside-App Protection Active");
-            binding.btnSetupSkipper.setIconResource(R.drawable.ic_check);
-        } else {
-            binding.tvSkipperStatusBadge.setText("SETUP REQUIRED • Tap to Enable");
-            binding.tvSkipperStatusBadge.setTextColor(requireContext().getColor(R.color.status_warning));
-            binding.btnSetupSkipper.setText("Enable Outside-App Auto Skipper");
-            binding.btnSetupSkipper.setIconResource(R.drawable.ic_settings);
+        // Upstream DNS display
+        String dnsKey = prefsManager.getDnsProvider();
+        String dnsName = "Cloudflare (1.1.1.1)";
+        if ("google".equalsIgnoreCase(dnsKey)) {
+            dnsName = "Google (8.8.8.8)";
+        } else if ("quad9".equalsIgnoreCase(dnsKey)) {
+            dnsName = "Quad9 (9.9.9.9)";
+        } else if ("adguard".equalsIgnoreCase(dnsKey)) {
+            dnsName = "AdGuard (94.140.14.14)";
         }
-        long skippedAds = prefsManager.getAutoSkippedAdsCount();
-        binding.tvAutoSkippedCount.setText(String.format(Locale.US, "%d Skipped", skippedAds));
+        binding.tvDnsIndicator.setText("DNS: " + dnsName);
 
         // Load recent blocked requests (up to 4)
         List<DnsLogEntry> recentBlocked = dbHelper.getRecentLogs(4, null, true);
@@ -222,16 +208,18 @@ public class DashboardFragment extends Fragment {
         uptimeRunnable = new Runnable() {
             @Override
             public void run() {
-                VpnState state = AdShieldVpnService.getVpnStateLiveData().getValue();
-                if (state == VpnState.CONNECTED) {
-                    Long start = AdShieldVpnService.getProtectionStartTimeMillis();
-                    if (start != null) {
-                        long elapsedSec = (System.currentTimeMillis() - start) / 1000L;
-                        long hours = elapsedSec / 3600;
-                        long minutes = (elapsedSec % 3600) / 60;
-                        long seconds = elapsedSec % 60;
-                        binding.tvProtectionUptime.setText(String.format(Locale.US,
-                                "Active for %02d:%02d:%02d • Filtering Active", hours, minutes, seconds));
+                if (binding != null) {
+                    VpnState state = AdShieldVpnService.getVpnStateLiveData().getValue();
+                    if (state == VpnState.CONNECTED) {
+                        Long start = AdShieldVpnService.getProtectionStartTimeMillis();
+                        if (start != null) {
+                            long elapsedSec = (System.currentTimeMillis() - start) / 1000L;
+                            long hours = elapsedSec / 3600;
+                            long minutes = (elapsedSec % 3600) / 60;
+                            long seconds = elapsedSec % 60;
+                            binding.tvProtectionUptime.setText(String.format(Locale.US,
+                                    "Active for %02d:%02d:%02d • Filtering Active", hours, minutes, seconds));
+                        }
                     }
                 }
                 uptimeHandler.postDelayed(this, 1000L);

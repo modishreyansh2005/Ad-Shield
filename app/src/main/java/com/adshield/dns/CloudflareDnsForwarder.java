@@ -63,7 +63,7 @@ public class CloudflareDnsForwarder {
         }
 
         // 3. Fallback to resilient global upstream servers (Google 8.8.8.8 / Quad9 9.9.9.9)
-        // Ensures Indian cellular carriers (like Reliance Jio) never fail to resolve Hotstar or system APIs
+        // Ensures cellular carriers never fail to resolve popular streaming or system APIs
         for (String fallbackIp : GLOBAL_FALLBACKS) {
             if (!fallbackIp.equals(primaryServer) && !fallbackIp.equals(secondaryServer)) {
                 response = queryUdp(fallbackIp, dnsQuery);

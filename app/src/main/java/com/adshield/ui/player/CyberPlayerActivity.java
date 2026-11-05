@@ -38,11 +38,9 @@ public class CyberPlayerActivity extends AppCompatActivity {
 
     public static final String EXTRA_TARGET = "extra_target";
     public static final String TARGET_YOUTUBE = "youtube";
-    public static final String TARGET_HOTSTAR = "hotstar";
     public static final String TARGET_SPOTIFY = "spotify";
 
     private static final String URL_YOUTUBE = "https://m.youtube.com";
-    private static final String URL_HOTSTAR = "https://www.hotstar.com";
     private static final String URL_SPOTIFY = "https://open.spotify.com";
 
     // Brave Browser scriptlet for YouTube ad defusing and element hiding
@@ -81,21 +79,6 @@ public class CyberPlayerActivity extends AppCompatActivity {
             "  if (document.head) document.head.appendChild(style);" +
             "})();";
 
-    // Brave Browser scriptlet for JioHotstar
-    private static final String BRAVE_HOTSTAR_SCRIPTLET =
-            "(function() {" +
-            "  setInterval(function() {" +
-            "    try {" +
-            "      var skip = document.querySelector('.ad-skip, .skip-ad, button[class*=\"skip\"]');" +
-            "      if (skip) skip.click();" +
-            "    } catch(e) {}" +
-            "  }, 200);" +
-            "  var css = '.advertisement-container, .companion-ad, .ad-banner { display: none !important; }';" +
-            "  var style = document.createElement('style');" +
-            "  style.textContent = css;" +
-            "  if (document.head) document.head.appendChild(style);" +
-            "})();";
-
     private ActivityCyberPlayerBinding binding;
     private DomainBlocklist domainBlocklist;
     private View customView;
@@ -126,7 +109,6 @@ public class CyberPlayerActivity extends AppCompatActivity {
         binding.btnCyberReload.setOnClickListener(v -> binding.cyberWebView.reload());
 
         binding.btnTabYoutube.setOnClickListener(v -> loadTarget(TARGET_YOUTUBE));
-        binding.btnTabHotstar.setOnClickListener(v -> loadTarget(TARGET_HOTSTAR));
         binding.btnTabSpotify.setOnClickListener(v -> loadTarget(TARGET_SPOTIFY));
     }
 
@@ -216,16 +198,19 @@ public class CyberPlayerActivity extends AppCompatActivity {
         if (url == null) return;
         if (url.contains("youtube.com")) {
             view.evaluateJavascript(BRAVE_YOUTUBE_SCRIPTLET, null);
-        } else if (url.contains("hotstar.com") || url.contains("jiocinema.com")) {
-            view.evaluateJavascript(BRAVE_HOTSTAR_SCRIPTLET, null);
+        } else if (url.contains("spotify.com")) {
+            String spotifyCss = "(function() { " +
+                    "  var css = '.Root__ads-container, [data-testid=\"ad-display\"], [data-testid=\"leaderboard-ad\"], .ReactModalPortal, #banner-ad { display: none !important; }';" +
+                    "  var style = document.createElement('style');" +
+                    "  style.textContent = css;" +
+                    "  if (document.head) document.head.appendChild(style);" +
+                    "})();";
+            view.evaluateJavascript(spotifyCss, null);
         }
     }
 
     private void loadTarget(String target) {
         switch (target) {
-            case TARGET_HOTSTAR:
-                binding.cyberWebView.loadUrl(URL_HOTSTAR);
-                break;
             case TARGET_SPOTIFY:
                 binding.cyberWebView.loadUrl(URL_SPOTIFY);
                 break;

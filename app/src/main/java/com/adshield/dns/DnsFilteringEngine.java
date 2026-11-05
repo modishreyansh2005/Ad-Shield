@@ -141,7 +141,7 @@ public class DnsFilteringEngine {
     private String identifyApp(String domain) {
         if (YouTubeFilter.isYouTubeRelated(domain)) return "YouTube";
         if (SpotifyFilter.isSpotifyRelated(domain)) return "Spotify";
-        if (JioHotstarFilter.isHotstarRelated(domain)) return "JioHotstar";
+        if (JioHotstarFilter.isHotstarRelated(domain)) return "Streaming";
         if (domain.contains("instagram") || domain.contains("cdninstagram")) return "Instagram";
         if (domain.contains("facebook") || domain.contains("fbcdn")) return "Facebook";
         if (domain.contains("google") || domain.contains("gstatic") || domain.contains("chrome")) return "Google/Chrome";
