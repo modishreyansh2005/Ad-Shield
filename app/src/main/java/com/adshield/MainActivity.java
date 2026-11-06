@@ -23,7 +23,6 @@ import com.adshield.service.AdShieldVpnService;
 import com.adshield.ui.apps.AppSelectionFragment;
 import com.adshield.ui.dashboard.DashboardFragment;
 import com.adshield.ui.filters.FilterManagementFragment;
-import com.adshield.ui.logs.QueryLogFragment;
 import com.adshield.ui.settings.SettingsFragment;
 
 public class MainActivity extends AppCompatActivity {
@@ -37,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
                 if (result.getResultCode() == RESULT_OK) {
                     launchVpnService();
                 } else {
-                    Toast.makeText(this, "VPN permission is required for local ad blocking.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "AdShield needs this permission to block ads.", Toast.LENGTH_LONG).show();
                 }
             }
     );
@@ -80,9 +79,6 @@ public class MainActivity extends AppCompatActivity {
             int id = item.getItemId();
             if (id == R.id.nav_dashboard) {
                 switchFragment(new DashboardFragment(), "Dashboard");
-                return true;
-            } else if (id == R.id.nav_logs) {
-                switchFragment(new QueryLogFragment(), "QueryLog");
                 return true;
             } else if (id == R.id.nav_apps) {
                 switchFragment(new AppSelectionFragment(), "Apps");

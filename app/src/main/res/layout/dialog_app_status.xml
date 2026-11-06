@@ -41,7 +41,7 @@
                 android:id="@+id/dialog_app_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ACTIVE • DNS FILTERING"
+                android:text="ON"
                 android:textColor="@color/status_allowed"
                 android:textSize="11sp"
                 android:textStyle="bold" />
@@ -68,7 +68,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TRACKING &amp; AD REQUESTS SINKHOLED"
+                android:text="ADS &amp; TRACKERS BLOCKED"
                 android:textColor="?attr/theme_text_muted"
                 android:textSize="11sp"
                 android:textStyle="bold" />
@@ -105,7 +105,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TECHNICAL TRANSPARENCY"
+                android:text="GOOD TO KNOW"
                 android:textColor="?attr/theme_accent"
                 android:textSize="11sp"
                 android:textStyle="bold" />
@@ -129,7 +129,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Launch in Ad-Free Cyber Hub (Brave Engine)"
+        android:text="Watch without ads in AdShield"
         android:textColor="#FFFFFF"
         android:textSize="13sp"
         app:backgroundTint="#2600E5FF"
@@ -146,7 +146,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:backgroundTint="?attr/theme_accent"
-        android:text="Understood"
+        android:text="OK"
         android:textColor="@android:color/white" />
 
 </LinearLayout>

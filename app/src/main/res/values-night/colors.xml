@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Lighter accents keep contrast on the dark navy background -->
+    <color name="brand_primary">#818CF8</color>
+    <color name="brand_secondary">#34D399</color>
+    <color name="brand_container">#312E81</color>
+    <color name="status_warning">#FBBF24</color>
+    <color name="badge_warning_bg">#2A2213</color>
+    <color name="badge_warning_border">#80FBBF24</color>
+    <color name="badge_success_bg">#0E291F</color>
+    <color name="badge_success_border">#8034D399</color>
+    <color name="power_off_fill">#1E293B</color>
+    <color name="power_off_fill_end">#162033</color>
+    <color name="power_off_ring">#2C3E5F</color>
+    <color name="power_off_icon">#64748B</color>
+</resources>

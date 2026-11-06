@@ -22,6 +22,7 @@ import com.adshield.R;
 import com.adshield.data.PreferencesManager;
 import com.adshield.data.db.AdShieldDbHelper;
 import com.adshield.data.model.VpnState;
+import com.adshield.dns.BlocklistStore;
 import com.adshield.dns.CloudflareDnsForwarder;
 import com.adshield.dns.DnsFilteringEngine;
 import com.adshield.dns.DomainBlocklist;
@@ -74,6 +75,12 @@ public class AdShieldVpnService extends VpnService {
     private DnsFilteringEngine filteringEngine = null;
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+        SpotifyAdMuter.register(this);
+    }
+
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         String action = (intent != null && intent.getAction() != null) ? intent.getAction() : ACTION_START;
 
@@ -82,7 +89,8 @@ public class AdShieldVpnService extends VpnService {
                 stopVpn();
                 return START_NOT_STICKY;
             case ACTION_RECONNECT:
-                stopVpn();
+                // Rebuild the tunnel only; stopVpn() would also stopSelf() and kill the service
+                teardownTunnel();
                 startVpn();
                 return START_STICKY;
             case ACTION_START:
@@ -93,6 +101,10 @@ public class AdShieldVpnService extends VpnService {
     }
 
     private void startVpn() {
+        if (isRunning) {
+            // Already running (e.g. boot receiver + user tap): replace the old tunnel instead of leaking it
+            teardownTunnel();
+        }
         vpnStateLiveData.postValue(VpnState.CONNECTING);
         protectionStartTimeMillis = System.currentTimeMillis();
 
@@ -165,7 +177,8 @@ public class AdShieldVpnService extends VpnService {
         isRunning = true;
         executor = Executors.newFixedThreadPool(4);
 
-        CloudflareDnsForwarder forwarder = new CloudflareDnsForwarder(this);
+        String[] upstream = prefs.getUpstreamDnsServers();
+        CloudflareDnsForwarder forwarder = new CloudflareDnsForwarder(this, upstream[0], upstream[1]);
         DomainBlocklist blocklist = new DomainBlocklist(dbHelper, prefs);
 
         filteringEngine = new DnsFilteringEngine(this, blocklist, forwarder, dbHelper, prefs);
@@ -182,6 +195,9 @@ public class AdShieldVpnService extends VpnService {
         });
 
         workerThread = new Thread(() -> {
+            // Large community list must be in memory before the first query is answered
+            BlocklistStore.getInstance().ensureLoaded(getApplicationContext());
+
             FileInputStream in = new FileInputStream(pfd.getFileDescriptor());
             FileOutputStream out = new FileOutputStream(pfd.getFileDescriptor());
             byte[] buffer = new byte[32767];
@@ -225,6 +241,22 @@ public class AdShieldVpnService extends VpnService {
 
     private void stopVpn() {
         vpnStateLiveData.postValue(VpnState.DISCONNECTING);
+        teardownTunnel();
+
+        PreferencesManager prefs = AdShieldApplication.getInstance().getPreferencesManager();
+        if (prefs != null) {
+            prefs.setProtectionEnabled(false);
+        }
+
+        vpnStateLiveData.postValue(VpnState.DISCONNECTED);
+
+        stopForeground(STOP_FOREGROUND_REMOVE);
+        stopSelf();
+        Log.i(TAG, "AdShield VPN stopped");
+    }
+
+    /** Closes the TUN interface and worker threads without stopping the service. */
+    private void teardownTunnel() {
         isRunning = false;
 
         if (vpnInterface != null) {
@@ -246,17 +278,6 @@ public class AdShieldVpnService extends VpnService {
 
         filteringEngine = null;
         protectionStartTimeMillis = null;
-
-        PreferencesManager prefs = AdShieldApplication.getInstance().getPreferencesManager();
-        if (prefs != null) {
-            prefs.setProtectionEnabled(false);
-        }
-
-        vpnStateLiveData.postValue(VpnState.DISCONNECTED);
-
-        stopForeground(STOP_FOREGROUND_REMOVE);
-        stopSelf();
-        Log.i(TAG, "AdShield VPN stopped");
     }
 
     @Override
@@ -269,6 +290,7 @@ public class AdShieldVpnService extends VpnService {
     @Override
     public void onDestroy() {
         stopVpn();
+        SpotifyAdMuter.unregister();
         super.onDestroy();
     }
 
@@ -299,7 +321,7 @@ public class AdShieldVpnService extends VpnService {
         PreferencesManager prefs = AdShieldApplication.getInstance().getPreferencesManager();
         long blocked = (prefs != null) ? prefs.getBlockedRequestsCount() : 0;
         String contentText = (blocked > 0)
-                ? ("Protection active • " + blocked + " requests blocked")
+                ? (blocked + " ads & trackers blocked")
                 : getString(R.string.vpn_notification_text);
 
         return new NotificationCompat.Builder(this, AdShieldApplication.CHANNEL_ID)

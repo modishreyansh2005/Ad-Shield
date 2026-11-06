@@ -86,7 +86,7 @@ public class AppSelectionAdapter extends RecyclerView.Adapter<AppSelectionAdapte
                 binding.tvAppStatus.setText("PROTECTED");
                 binding.tvAppStatus.setTextColor(Color.parseColor("#10B981")); // Emerald Green
             } else {
-                binding.tvAppStatus.setText("EXCLUDED (BYPASSED)");
+                binding.tvAppStatus.setText("NOT PROTECTED");
                 binding.tvAppStatus.setTextColor(Color.parseColor("#94A3B8")); // Muted Gray
             }
         }

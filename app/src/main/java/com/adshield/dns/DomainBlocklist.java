@@ -102,7 +102,14 @@ public class DomainBlocklist {
             }
         }
 
-        // 6. Default blocklist matching (hierarchical parent check)
+        // 6. Essential streaming/login infrastructure is never blocked by the generic lists below
+        if (YouTubeFilter.isEssentialYouTube(clean)
+                || SpotifyFilter.isEssentialSpotify(clean)
+                || JioHotstarFilter.isEssentialHotstar(clean)) {
+            return false;
+        }
+
+        // 7. Default blocklist matching (hierarchical parent check)
         if (defaultBlockedDomains.contains(clean)) {
             return true;
         }
@@ -116,7 +123,8 @@ public class DomainBlocklist {
             dotIndex = clean.indexOf('.', dotIndex + 1);
         }
 
-        return false;
+        // 8. Large community blocklist (bundled offline, updatable from Filters screen)
+        return BlocklistStore.getInstance().contains(clean);
     }
 
     private boolean isWhitelisted(String cleanDomain) {

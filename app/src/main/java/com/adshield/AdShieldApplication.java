@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 
 import com.adshield.data.PreferencesManager;
 import com.adshield.data.db.AdShieldDbHelper;
+import com.adshield.dns.BlocklistStore;
 
 public class AdShieldApplication extends Application {
 
@@ -34,6 +35,9 @@ public class AdShieldApplication extends Application {
         AppCompatDelegate.setDefaultNightMode(preferencesManager.getThemeMode());
 
         createNotificationChannel();
+
+        // Parse the ~80k-domain community blocklist off the main thread at startup
+        BlocklistStore.getInstance().loadAsync(this);
     }
 
     public PreferencesManager getPreferencesManager() {

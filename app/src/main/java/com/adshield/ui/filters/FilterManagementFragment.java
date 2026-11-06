@@ -3,6 +3,8 @@ package com.adshield.ui.filters;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,10 +20,13 @@ import com.adshield.R;
 import com.adshield.data.db.AdShieldDbHelper;
 import com.adshield.data.model.FilterRule;
 import com.adshield.databinding.FragmentFiltersBinding;
+import com.adshield.dns.BlocklistStore;
 import com.adshield.dns.DomainBlocklist;
 import com.google.android.material.tabs.TabLayout;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -31,6 +36,7 @@ public class FilterManagementFragment extends Fragment implements FilterRulesAda
     private AdShieldDbHelper dbHelper;
     private FilterRulesAdapter adapter;
     private int currentTabIndex = 0; // 0 = Blacklist, 1 = Whitelist, 2 = Community
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     @Nullable
     @Override
@@ -74,7 +80,13 @@ public class FilterManagementFragment extends Fragment implements FilterRulesAda
     }
 
     private void setupFab() {
-        binding.fabAddRule.setOnClickListener(v -> showAddRuleDialog());
+        binding.fabAddRule.setOnClickListener(v -> {
+            if (currentTabIndex == 2) {
+                updateCommunityBlocklist();
+            } else {
+                showAddRuleDialog();
+            }
+        });
     }
 
     private void loadTabRules() {
@@ -82,26 +94,30 @@ public class FilterManagementFragment extends Fragment implements FilterRulesAda
 
         if (currentTabIndex == 0) {
             // Blacklist
-            binding.tvFiltersSummary.setText("Custom blocked domains. Matches all subdomains automatically.");
+            binding.tvFiltersSummary.setText("Websites you block. Their sub-sites are blocked too.");
             binding.fabAddRule.setVisibility(View.VISIBLE);
-            binding.fabAddRule.setText("Add Blocked Domain");
+            binding.fabAddRule.setText("Block a website");
+            binding.fabAddRule.setIconResource(R.drawable.ic_add);
             adapter.setReadOnly(false);
 
             List<FilterRule> rules = dbHelper.getRules(FilterRule.Type.BLACKLIST);
             updateListUi(rules);
         } else if (currentTabIndex == 1) {
             // Whitelist
-            binding.tvFiltersSummary.setText("Allowed domains that bypass all ad blocking and filtering.");
+            binding.tvFiltersSummary.setText("Websites that are never blocked. Add one here if a site or app stops working.");
             binding.fabAddRule.setVisibility(View.VISIBLE);
-            binding.fabAddRule.setText("Add Whitelist Domain");
+            binding.fabAddRule.setText("Allow a website");
+            binding.fabAddRule.setIconResource(R.drawable.ic_add);
             adapter.setReadOnly(false);
 
             List<FilterRule> rules = dbHelper.getRules(FilterRule.Type.WHITELIST);
             updateListUi(rules);
         } else {
             // Built-in Community
-            binding.tvFiltersSummary.setText("Verified community security & ad blocking definitions included offline.");
-            binding.fabAddRule.setVisibility(View.GONE);
+            binding.tvFiltersSummary.setText(buildCommunitySummary());
+            binding.fabAddRule.setVisibility(View.VISIBLE);
+            binding.fabAddRule.setText("Update");
+            binding.fabAddRule.setIconResource(R.drawable.ic_shield_check);
             adapter.setReadOnly(true);
 
             List<FilterRule> rules = new ArrayList<>();
@@ -111,6 +127,39 @@ public class FilterManagementFragment extends Fragment implements FilterRulesAda
             }
             updateListUi(rules);
         }
+    }
+
+    private String buildCommunitySummary() {
+        BlocklistStore store = BlocklistStore.getInstance();
+        long updated = store.getLastUpdatedMillis(requireContext());
+        String source = (updated > 0)
+                ? "last updated " + DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(new Date(updated))
+                : "built into the app";
+        String count = store.isLoaded() ? String.format(Locale.US, "%,d", store.size()) : "Loading";
+        return count + " ad & tracker websites are blocked automatically (" + source + ").";
+    }
+
+    private void updateCommunityBlocklist() {
+        Context appContext = requireContext().getApplicationContext();
+        binding.fabAddRule.setEnabled(false);
+        binding.fabAddRule.setText("Updating…");
+
+        new Thread(() -> {
+            String message;
+            try {
+                int count = BlocklistStore.getInstance().updateFromUrl(appContext, BlocklistStore.DEFAULT_UPDATE_URL);
+                message = String.format(Locale.US, "Updated: %,d websites blocked", count);
+            } catch (Exception e) {
+                message = "Couldn't update. Check your internet connection and try again.";
+            }
+            String finalMessage = message;
+            mainHandler.post(() -> {
+                Toast.makeText(appContext, finalMessage, Toast.LENGTH_LONG).show();
+                if (binding == null) return;
+                binding.fabAddRule.setEnabled(true);
+                loadTabRules();
+            });
+        }, "AdShield-BlocklistUpdate").start();
     }
 
     private void updateListUi(List<FilterRule> rules) {
@@ -126,7 +175,7 @@ public class FilterManagementFragment extends Fragment implements FilterRulesAda
 
     private void showAddRuleDialog() {
         FilterRule.Type targetType = (currentTabIndex == 0) ? FilterRule.Type.BLACKLIST : FilterRule.Type.WHITELIST;
-        String title = (targetType == FilterRule.Type.BLACKLIST) ? "Add Domain to Blacklist" : "Add Domain to Whitelist";
+        String title = (targetType == FilterRule.Type.BLACKLIST) ? "Block a website" : "Allow a website";
 
         View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_add_rule, null);
         EditText etDomain = dialogView.findViewById(R.id.et_rule_domain);
@@ -134,19 +183,19 @@ public class FilterManagementFragment extends Fragment implements FilterRulesAda
         new AlertDialog.Builder(requireContext())
                 .setTitle(title)
                 .setView(dialogView)
-                .setPositiveButton("Add Rule", (dialog, which) -> {
+                .setPositiveButton("Add", (dialog, which) -> {
                     String domain = etDomain.getText().toString().trim().toLowerCase(Locale.US);
                     if (domain.isEmpty() || !domain.contains(".") || domain.contains(" ")) {
-                        Toast.makeText(requireContext(), "Please enter a valid domain name (e.g. ads.example.com)", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), "Enter a website address, like ads.example.com", Toast.LENGTH_SHORT).show();
                         return;
                     }
 
                     boolean success = dbHelper.addOrUpdateRule(domain, targetType);
                     if (success) {
-                        Toast.makeText(requireContext(), "Rule added: " + domain, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), "Added " + domain, Toast.LENGTH_SHORT).show();
                         loadTabRules();
                     } else {
-                        Toast.makeText(requireContext(), "Failed to add rule.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), "Couldn't add this website.", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .setNegativeButton("Cancel", null)
@@ -161,9 +210,9 @@ public class FilterManagementFragment extends Fragment implements FilterRulesAda
     @Override
     public void onRuleDelete(FilterRule rule) {
         new AlertDialog.Builder(requireContext())
-                .setTitle("Delete Rule")
-                .setMessage("Are you sure you want to delete '" + rule.getDomain() + "'?")
-                .setPositiveButton("Delete", (dialog, which) -> {
+                .setTitle("Remove website")
+                .setMessage("Remove " + rule.getDomain() + " from this list?")
+                .setPositiveButton("Remove", (dialog, which) -> {
                     dbHelper.deleteRule(rule.getDomain());
                     loadTabRules();
                 })

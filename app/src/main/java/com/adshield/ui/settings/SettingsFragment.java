@@ -20,8 +20,10 @@ import androidx.fragment.app.Fragment;
 
 import com.adshield.R;
 import com.adshield.data.PreferencesManager;
+import com.adshield.data.model.VpnState;
 import com.adshield.databinding.FragmentSettingsBinding;
 import com.adshield.service.AdShieldVpnService;
+import com.adshield.service.MediaAdMuteService;
 
 public class SettingsFragment extends Fragment {
 
@@ -45,56 +47,48 @@ public class SettingsFragment extends Fragment {
         setupThemePicker();
         setupDnsPicker();
         setupShieldSwitches();
-        setupOutsideSkipperSettings();
+        setupSpotifyMuteSetting();
         setupResetButton();
     }
 
-    private void setupOutsideSkipperSettings() {
-        binding.switchAutoSkipper.setChecked(prefsManager.isAutoSkipperEnabled());
-        binding.switchAutoSkipper.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            prefsManager.setAutoSkipperEnabled(isChecked);
-        });
-
+    private void setupSpotifyMuteSetting() {
         binding.switchAutoMute.setChecked(prefsManager.isAutoMuteAdsEnabled());
         binding.switchAutoMute.setOnCheckedChangeListener((buttonView, isChecked) -> {
             prefsManager.setAutoMuteAdsEnabled(isChecked);
         });
 
-        updateAccessibilitySummary();
-        binding.cardAccessibilitySettings.setOnClickListener(v -> {
+        binding.cardNotificationAccess.setOnClickListener(v -> {
             try {
-                Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-                startActivity(intent);
-                Toast.makeText(requireContext(), "Turn ON 'AdShield Video Ad Auto-Skipper'", Toast.LENGTH_LONG).show();
+                startActivity(new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS));
+                Toast.makeText(requireContext(), "Turn on 'AdShield Ad Mute'", Toast.LENGTH_LONG).show();
             } catch (Exception e) {
-                Toast.makeText(requireContext(), "Could not open Accessibility Settings", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "Couldn't open the setting. Find it in Settings → Notifications → Device & app notifications.", Toast.LENGTH_LONG).show();
             }
         });
+        updateNotificationAccessSummary();
     }
 
-    private void updateAccessibilitySummary() {
-        if (getContext() == null || binding == null)
-            return;
-        boolean isRunning = PreferencesManager.isAccessibilityServiceRunning(getContext());
-        if (isRunning) {
-            binding.tvAccessibilityServiceStatus.setText("Granted & Active • Auto-Skipping Running");
-            binding.tvAccessibilityServiceStatus.setTextColor(requireContext().getColor(R.color.brand_secondary));
+    private void updateNotificationAccessSummary() {
+        if (getContext() == null || binding == null) return;
+        if (MediaAdMuteService.isAccessGranted(requireContext())) {
+            binding.tvNotificationAccessStatus.setText("On • Ads will be muted");
+            binding.tvNotificationAccessStatus.setTextColor(requireContext().getColor(R.color.brand_secondary));
         } else {
-            binding.tvAccessibilityServiceStatus.setText("Permission Required • Tap to enable in Settings");
-            binding.tvAccessibilityServiceStatus.setTextColor(requireContext().getColor(R.color.status_warning));
+            binding.tvNotificationAccessStatus.setText("Off • Tap to turn on");
+            binding.tvNotificationAccessStatus.setTextColor(requireContext().getColor(R.color.status_warning));
         }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        updateAccessibilitySummary();
+        updateNotificationAccessSummary();
     }
 
     private void setupThemePicker() {
         updateThemeSummary();
         binding.cardSettingTheme.setOnClickListener(v -> {
-            String[] options = { "System Default", "Light Mode", "Dark Mode (Cybersecurity)" };
+            String[] options = {"Same as phone", "Light", "Dark"};
             int currentMode = prefsManager.getThemeMode();
             int selectedIndex = 0;
             if (currentMode == AppCompatDelegate.MODE_NIGHT_NO) {
@@ -104,7 +98,7 @@ public class SettingsFragment extends Fragment {
             }
 
             new AlertDialog.Builder(requireContext())
-                    .setTitle("Select App Theme")
+                    .setTitle("Theme")
                     .setSingleChoiceItems(options, selectedIndex, (dialog, which) -> {
                         int targetMode;
                         if (which == 1) {
@@ -128,11 +122,11 @@ public class SettingsFragment extends Fragment {
     private void updateThemeSummary() {
         int mode = prefsManager.getThemeMode();
         if (mode == AppCompatDelegate.MODE_NIGHT_NO) {
-            binding.tvCurrentTheme.setText("Light Mode");
+            binding.tvCurrentTheme.setText("Light");
         } else if (mode == AppCompatDelegate.MODE_NIGHT_YES) {
-            binding.tvCurrentTheme.setText("Dark Mode (Cybersecurity)");
+            binding.tvCurrentTheme.setText("Dark");
         } else {
-            binding.tvCurrentTheme.setText("System Default");
+            binding.tvCurrentTheme.setText("Same as phone");
         }
     }
 
@@ -140,10 +134,10 @@ public class SettingsFragment extends Fragment {
         updateDnsSummary();
         binding.cardSettingDns.setOnClickListener(v -> {
             String[] providers = {
-                    "Cloudflare DNS (1.1.1.1 / 1.0.0.1)",
-                    "Google Public DNS (8.8.8.8 / 8.8.4.4)",
-                    "Quad9 Security DNS (9.9.9.9)",
-                    "AdGuard DNS (94.140.14.14)"
+                    "Cloudflare (fast, recommended)",
+                    "Google",
+                    "Quad9 (also blocks harmful sites)",
+                    "AdGuard (blocks even more ads)"
             };
             String[] keys = { "cloudflare", "google", "quad9", "adguard" };
 
@@ -157,20 +151,22 @@ public class SettingsFragment extends Fragment {
             }
 
             new AlertDialog.Builder(requireContext())
-                    .setTitle("Choose Upstream DNS Provider")
+                    .setTitle("Lookup service")
                     .setSingleChoiceItems(providers, selected, (dialog, which) -> {
                         String newKey = keys[which];
                         prefsManager.setDnsProvider(newKey);
                         updateDnsSummary();
 
-                        // Reconnect active VPN service if running
+                        // Reconnect only if protection is on; otherwise this would start the VPN unasked
                         Context ctx = requireContext();
-                        Intent reconnectIntent = new Intent(ctx, AdShieldVpnService.class);
-                        reconnectIntent.setAction(AdShieldVpnService.ACTION_RECONNECT);
-                        ctx.startService(reconnectIntent);
+                        if (AdShieldVpnService.getVpnStateLiveData().getValue() == VpnState.CONNECTED) {
+                            Intent reconnectIntent = new Intent(ctx, AdShieldVpnService.class);
+                            reconnectIntent.setAction(AdShieldVpnService.ACTION_RECONNECT);
+                            ctx.startService(reconnectIntent);
+                        }
 
                         dialog.dismiss();
-                        Toast.makeText(ctx, "DNS Provider set to " + providers[which], Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ctx, "Now using " + providers[which], Toast.LENGTH_SHORT).show();
                     })
                     .setNegativeButton("Cancel", null)
                     .show();
@@ -181,17 +177,17 @@ public class SettingsFragment extends Fragment {
         String key = prefsManager.getDnsProvider();
         switch (key.toLowerCase(java.util.Locale.ROOT)) {
             case "google":
-                binding.tvCurrentDns.setText("Google DNS (8.8.8.8)");
+                binding.tvCurrentDns.setText("Google");
                 break;
             case "quad9":
-                binding.tvCurrentDns.setText("Quad9 DNS (9.9.9.9)");
+                binding.tvCurrentDns.setText("Quad9 (also blocks harmful sites)");
                 break;
             case "adguard":
-                binding.tvCurrentDns.setText("AdGuard DNS (94.140.14.14)");
+                binding.tvCurrentDns.setText("AdGuard (blocks even more ads)");
                 break;
             case "cloudflare":
             default:
-                binding.tvCurrentDns.setText("Cloudflare DNS (1.1.1.1)");
+                binding.tvCurrentDns.setText("Cloudflare (recommended)");
                 break;
         }
     }
@@ -211,11 +207,11 @@ public class SettingsFragment extends Fragment {
     private void setupResetButton() {
         binding.btnResetStats.setOnClickListener(v -> {
             new AlertDialog.Builder(requireContext())
-                    .setTitle("Reset Statistics")
-                    .setMessage("Are you sure you want to reset all query and ad-blocking counters?")
+                    .setTitle("Reset counters")
+                    .setMessage("Set all ad-blocking counters back to zero?")
                     .setPositiveButton("Reset", (dialog, which) -> {
                         prefsManager.resetStatistics();
-                        Toast.makeText(requireContext(), "Statistics have been reset.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), "Counters reset.", Toast.LENGTH_SHORT).show();
                     })
                     .setNegativeButton("Cancel", null)
                     .show();

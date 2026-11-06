@@ -64,6 +64,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata:2.7.0")
     implementation("androidx.core:core:1.13.1")
     implementation("androidx.activity:activity:1.8.2")
+    implementation("androidx.webkit:webkit:1.8.0")
 
     // Testing (JUnit 4)
     testImplementation("junit:junit:4.13.2")

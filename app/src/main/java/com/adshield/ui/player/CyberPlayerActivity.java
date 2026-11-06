@@ -17,6 +17,8 @@ import android.widget.FrameLayout;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.webkit.WebViewCompat;
+import androidx.webkit.WebViewFeature;
 
 import com.adshield.data.PreferencesManager;
 import com.adshield.data.db.AdShieldDbHelper;
@@ -24,7 +26,11 @@ import com.adshield.databinding.ActivityCyberPlayerBinding;
 import com.adshield.dns.DomainBlocklist;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 
 /**
  * AdShield Cyber Player.
@@ -39,45 +45,15 @@ public class CyberPlayerActivity extends AppCompatActivity {
     public static final String EXTRA_TARGET = "extra_target";
     public static final String TARGET_YOUTUBE = "youtube";
     public static final String TARGET_SPOTIFY = "spotify";
+    public static final String TARGET_YTMUSIC = "ytmusic";
 
     private static final String URL_YOUTUBE = "https://m.youtube.com";
     private static final String URL_SPOTIFY = "https://open.spotify.com";
+    private static final String URL_YTMUSIC = "https://music.youtube.com";
+    private static final String YOUTUBE_SCRIPTLET_ASSET = "youtube_scriptlet.js";
 
-    // Brave Browser scriptlet for YouTube ad defusing and element hiding
-    private static final String BRAVE_YOUTUBE_SCRIPTLET =
-            "(function() {" +
-            "  try {" +
-            "    var origParse = JSON.parse;" +
-            "    JSON.parse = function(text, reviver) {" +
-            "      var obj = origParse.call(this, text, reviver);" +
-            "      if (obj && typeof obj === 'object') {" +
-            "        if (obj.adPlacements) obj.adPlacements = [];" +
-            "        if (obj.playerAds) obj.playerAds = [];" +
-            "        if (obj.adSlots) obj.adSlots = [];" +
-            "      }" +
-            "      return obj;" +
-            "    };" +
-            "  } catch(e) {}" +
-            "  setInterval(function() {" +
-            "    try {" +
-            "      var skipBtn = document.querySelector('.ytp-ad-skip-button, .ytp-ad-skip-button-modern, .videoAdUiSkipButton, button.ytp-ad-skip-button-text');" +
-            "      if (skipBtn) skipBtn.click();" +
-            "      var adShowing = document.querySelector('.ad-showing, .ad-interrupting');" +
-            "      var video = document.querySelector('video');" +
-            "      if (adShowing && video && !isNaN(video.duration)) {" +
-            "        video.muted = true;" +
-            "        video.currentTime = video.duration;" +
-            "        if (skipBtn) skipBtn.click();" +
-            "      }" +
-            "      var overlayClose = document.querySelector('.ytp-ad-overlay-close-button, .ytp-ad-feedback-dialog-close-button');" +
-            "      if (overlayClose) overlayClose.click();" +
-            "    } catch(e) {}" +
-            "  }, 120);" +
-            "  var css = '.ad-container, .ytp-ad-module, .ytp-ad-overlay-container, ytd-promoted-video-renderer, ytd-display-ad-renderer, ytd-statement-banner-renderer, ytd-banner-promo-renderer, #player-ads, ytm-promoted-sparkles-web-renderer { display: none !important; }';" +
-            "  var style = document.createElement('style');" +
-            "  style.textContent = css;" +
-            "  if (document.head) document.head.appendChild(style);" +
-            "})();";
+    private String youtubeScriptlet = "";
+    private boolean documentStartScriptInstalled = false;
 
     private ActivityCyberPlayerBinding binding;
     private DomainBlocklist domainBlocklist;
@@ -110,9 +86,10 @@ public class CyberPlayerActivity extends AppCompatActivity {
 
         binding.btnTabYoutube.setOnClickListener(v -> loadTarget(TARGET_YOUTUBE));
         binding.btnTabSpotify.setOnClickListener(v -> loadTarget(TARGET_SPOTIFY));
+        binding.btnTabYtmusic.setOnClickListener(v -> loadTarget(TARGET_YTMUSIC));
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
+    @SuppressLint({"SetJavaScriptEnabled", "RestrictedApi"})
     private void setupWebView() {
         WebSettings settings = binding.cyberWebView.getSettings();
         settings.setJavaScriptEnabled(true);
@@ -127,6 +104,17 @@ public class CyberPlayerActivity extends AppCompatActivity {
 
         // Modern Mobile Chrome User Agent for responsive player layout
         settings.setUserAgentString("Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36 AdShield/2.0");
+
+        // The ad-stripping hooks must run before YouTube's own scripts read the player response;
+        // onPageStarted/onPageFinished injection is too late, so it is only a fallback.
+        youtubeScriptlet = readAsset(YOUTUBE_SCRIPTLET_ASSET);
+        if (!youtubeScriptlet.isEmpty() && WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
+            try {
+                WebViewCompat.addDocumentStartJavaScript(binding.cyberWebView, youtubeScriptlet,
+                        Collections.singleton("https://*.youtube.com"));
+                documentStartScriptInstalled = true;
+            } catch (Exception ignored) {}
+        }
 
         binding.cyberWebView.setWebViewClient(new WebViewClient() {
             @Override
@@ -197,7 +185,10 @@ public class CyberPlayerActivity extends AppCompatActivity {
     private void injectBraveScriptlets(WebView view, String url) {
         if (url == null) return;
         if (url.contains("youtube.com")) {
-            view.evaluateJavascript(BRAVE_YOUTUBE_SCRIPTLET, null);
+            // Script guards against double install, so re-running is harmless
+            if (!documentStartScriptInstalled && !youtubeScriptlet.isEmpty()) {
+                view.evaluateJavascript(youtubeScriptlet, null);
+            }
         } else if (url.contains("spotify.com")) {
             String spotifyCss = "(function() { " +
                     "  var css = '.Root__ads-container, [data-testid=\"ad-display\"], [data-testid=\"leaderboard-ad\"], .ReactModalPortal, #banner-ad { display: none !important; }';" +
@@ -214,10 +205,25 @@ public class CyberPlayerActivity extends AppCompatActivity {
             case TARGET_SPOTIFY:
                 binding.cyberWebView.loadUrl(URL_SPOTIFY);
                 break;
+            case TARGET_YTMUSIC:
+                binding.cyberWebView.loadUrl(URL_YTMUSIC);
+                break;
             case TARGET_YOUTUBE:
             default:
                 binding.cyberWebView.loadUrl(URL_YOUTUBE);
                 break;
+        }
+    }
+
+    private String readAsset(String name) {
+        try (InputStream in = getAssets().open(name);
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            byte[] buf = new byte[8192];
+            int n;
+            while ((n = in.read(buf)) != -1) out.write(buf, 0, n);
+            return out.toString(StandardCharsets.UTF_8.name());
+        } catch (IOException e) {
+            return "";
         }
     }
 
