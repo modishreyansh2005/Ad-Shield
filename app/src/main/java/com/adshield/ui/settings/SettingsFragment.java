@@ -30,7 +30,8 @@ public class SettingsFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         binding = FragmentSettingsBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -72,7 +73,8 @@ public class SettingsFragment extends Fragment {
     }
 
     private void updateAccessibilitySummary() {
-        if (getContext() == null || binding == null) return;
+        if (getContext() == null || binding == null)
+            return;
         boolean isRunning = PreferencesManager.isAccessibilityServiceRunning(getContext());
         if (isRunning) {
             binding.tvAccessibilityServiceStatus.setText("Granted & Active • Auto-Skipping Running");
@@ -92,7 +94,7 @@ public class SettingsFragment extends Fragment {
     private void setupThemePicker() {
         updateThemeSummary();
         binding.cardSettingTheme.setOnClickListener(v -> {
-            String[] options = {"System Default", "Light Mode", "Dark Mode (Cybersecurity)"};
+            String[] options = { "System Default", "Light Mode", "Dark Mode (Cybersecurity)" };
             int currentMode = prefsManager.getThemeMode();
             int selectedIndex = 0;
             if (currentMode == AppCompatDelegate.MODE_NIGHT_NO) {
@@ -143,7 +145,7 @@ public class SettingsFragment extends Fragment {
                     "Quad9 Security DNS (9.9.9.9)",
                     "AdGuard DNS (94.140.14.14)"
             };
-            String[] keys = {"cloudflare", "google", "quad9", "adguard"};
+            String[] keys = { "cloudflare", "google", "quad9", "adguard" };
 
             String currentKey = prefsManager.getDnsProvider();
             int selected = 0;
@@ -177,7 +179,7 @@ public class SettingsFragment extends Fragment {
 
     private void updateDnsSummary() {
         String key = prefsManager.getDnsProvider();
-        switch (key.toLowerCase()) {
+        switch (key.toLowerCase(java.util.Locale.ROOT)) {
             case "google":
                 binding.tvCurrentDns.setText("Google DNS (8.8.8.8)");
                 break;
