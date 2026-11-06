@@ -2,14 +2,11 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="oval">
     <gradient
-        android:angle="135"
-        android:startColor="#1E2A40"
-        android:endColor="#111827"
+        android:angle="270"
+        android:startColor="@color/power_off_fill"
+        android:endColor="@color/power_off_fill_end"
         android:type="linear" />
-    <size
-        android:width="128dp"
-        android:height="128dp" />
     <stroke
-        android:width="3dp"
-        android:color="#2C3E5F" />
+        android:width="2dp"
+        android:color="@color/power_off_ring" />
 </shape>

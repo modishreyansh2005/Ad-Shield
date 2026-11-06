@@ -2,7 +2,6 @@ package com.adshield.ui.dashboard;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -13,19 +12,15 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.adshield.MainActivity;
 import com.adshield.R;
 import com.adshield.data.PreferencesManager;
 import com.adshield.data.db.AdShieldDbHelper;
-import com.adshield.data.model.DnsLogEntry;
 import com.adshield.data.model.VpnState;
 import com.adshield.databinding.FragmentDashboardBinding;
 import com.adshield.service.AdShieldVpnService;
-import com.adshield.ui.logs.QueryLogAdapter;
 
-import java.util.List;
 import java.util.Locale;
 
 public class DashboardFragment extends Fragment {
@@ -33,9 +28,9 @@ public class DashboardFragment extends Fragment {
     private FragmentDashboardBinding binding;
     private PreferencesManager prefsManager;
     private AdShieldDbHelper dbHelper;
-    private QueryLogAdapter recentBlockedAdapter;
     private final Handler uptimeHandler = new Handler(Looper.getMainLooper());
     private Runnable uptimeRunnable;
+    private android.animation.ObjectAnimator glowPulse;
 
     @Nullable
     @Override
@@ -51,7 +46,6 @@ public class DashboardFragment extends Fragment {
         prefsManager = new PreferencesManager(context);
         dbHelper = AdShieldDbHelper.getInstance(context);
 
-        setupRecyclerView();
         setupClickListeners();
         observeVpnState();
         observeCounts();
@@ -59,25 +53,45 @@ public class DashboardFragment extends Fragment {
         startUptimeTicker();
     }
 
-    private void setupRecyclerView() {
-        recentBlockedAdapter = new QueryLogAdapter();
-        binding.recyclerRecentBlocked.setLayoutManager(new LinearLayoutManager(requireContext()));
-        binding.recyclerRecentBlocked.setAdapter(recentBlockedAdapter);
-    }
-
     private void setupClickListeners() {
-        binding.btnPower.setOnClickListener(v -> toggleProtection());
-        binding.btnToggleProtection.setOnClickListener(v -> toggleProtection());
-
-        binding.btnViewAllLogs.setOnClickListener(v -> {
-            if (getActivity() instanceof MainActivity) {
-                ((MainActivity) getActivity()).navigateTo(R.id.nav_logs);
-            }
+        binding.btnPower.setOnClickListener(v -> {
+            // Quick press "bounce" so the tap feels physical
+            v.animate().scaleX(0.92f).scaleY(0.92f).setDuration(90)
+                    .withEndAction(() -> v.animate().scaleX(1f).scaleY(1f).setDuration(160).start())
+                    .start();
+            toggleProtection();
         });
 
         binding.cardStreamingHub.setOnClickListener(v -> openStreamingHub(com.adshield.ui.player.CyberPlayerActivity.TARGET_YOUTUBE));
         binding.btnLaunchYoutube.setOnClickListener(v -> openStreamingHub(com.adshield.ui.player.CyberPlayerActivity.TARGET_YOUTUBE));
         binding.btnLaunchSpotify.setOnClickListener(v -> openStreamingHub(com.adshield.ui.player.CyberPlayerActivity.TARGET_SPOTIFY));
+
+        binding.cardPrivateDns.setOnClickListener(v -> {
+            try {
+                startActivity(new android.content.Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS));
+            } catch (Exception ignored) {}
+        });
+    }
+
+    private void updatePrivateDnsWarning() {
+        if (!isAdded() || binding == null) return;
+        Context ctx = requireContext();
+        String strictHost = PreferencesManager.getStrictPrivateDnsHost(ctx);
+        if (strictHost != null) {
+            binding.tvPrivateDnsTip.setText("Your phone's Private DNS setting (" + strictHost + ") stops AdShield from "
+                    + "blocking ads. Tap here, open Private DNS and choose Off or Automatic.");
+            binding.tvPrivateDnsTip.setTextColor(ctx.getColor(R.color.status_warning));
+            binding.ivPrivateDnsIcon.setImageTintList(ColorStateList.valueOf(ctx.getColor(R.color.status_warning)));
+            binding.cardPrivateDns.setStrokeColor(ColorStateList.valueOf(ctx.getColor(R.color.status_warning)));
+        } else {
+            binding.tvPrivateDnsTip.setText("Tip: For best results, set Private DNS to Off or Automatic in your phone's settings.");
+            android.util.TypedValue tv = new android.util.TypedValue();
+            ctx.getTheme().resolveAttribute(R.attr.theme_text_secondary, tv, true);
+            binding.tvPrivateDnsTip.setTextColor(tv.data);
+            binding.ivPrivateDnsIcon.setImageTintList(ColorStateList.valueOf(ctx.getColor(R.color.brand_primary)));
+            ctx.getTheme().resolveAttribute(R.attr.theme_border, tv, true);
+            binding.cardPrivateDns.setStrokeColor(ColorStateList.valueOf(tv.data));
+        }
     }
 
     private void openStreamingHub(String target) {
@@ -118,51 +132,81 @@ public class DashboardFragment extends Fragment {
         switch (state) {
             case CONNECTED:
                 binding.btnPower.setBackgroundResource(R.drawable.bg_power_button_on);
-                binding.viewGlowRing.setVisibility(View.VISIBLE);
+                binding.btnPower.setImageTintList(ColorStateList.valueOf(ctx.getColor(R.color.power_on_icon)));
+                applyButtonShadow(ctx, 18f, R.color.power_on_shadow);
+                startGlowPulse();
                 binding.tvProtectionStatus.setText(R.string.status_protected);
                 binding.tvProtectionStatus.setBackgroundResource(R.drawable.bg_badge_success);
                 binding.tvProtectionStatus.setTextColor(ctx.getColor(R.color.brand_secondary));
-
-                binding.btnToggleProtection.setText("Turn off protection");
-                binding.btnToggleProtection.setIconResource(R.drawable.ic_power);
-                binding.btnToggleProtection.setBackgroundColor(Color.parseColor("#1A253A"));
-                binding.btnToggleProtection.setStrokeColor(ColorStateList.valueOf(ctx.getColor(R.color.status_blocked)));
-                binding.btnToggleProtection.setStrokeWidth(2);
-                binding.btnToggleProtection.setTextColor(ctx.getColor(R.color.status_blocked));
-                binding.btnToggleProtection.setIconTint(ColorStateList.valueOf(ctx.getColor(R.color.status_blocked)));
+                updateUptimeText();
                 break;
             case CONNECTING:
                 binding.btnPower.setBackgroundResource(R.drawable.bg_power_button_off);
-                binding.viewGlowRing.setVisibility(View.GONE);
+                binding.btnPower.setImageTintList(ColorStateList.valueOf(ctx.getColor(R.color.brand_secondary)));
+                applyButtonShadow(ctx, 10f, R.color.power_off_shadow);
+                stopGlowPulse();
                 binding.tvProtectionStatus.setText(R.string.status_connecting);
                 binding.tvProtectionStatus.setBackgroundResource(R.drawable.bg_badge_warning);
                 binding.tvProtectionStatus.setTextColor(ctx.getColor(R.color.status_warning));
-                binding.tvProtectionUptime.setText("Configuring secure DNS routing...");
-
-                binding.btnToggleProtection.setText("Connecting...");
-                binding.btnToggleProtection.setIconResource(R.drawable.ic_shield_check);
-                binding.btnToggleProtection.setBackgroundColor(ctx.getColor(R.color.brand_secondary));
-                binding.btnToggleProtection.setStrokeWidth(0);
-                binding.btnToggleProtection.setTextColor(Color.parseColor("#0B1220"));
-                binding.btnToggleProtection.setIconTint(ColorStateList.valueOf(Color.parseColor("#0B1220")));
+                binding.tvProtectionUptime.setText("Turning on…");
                 break;
             case DISCONNECTED:
             default:
                 binding.btnPower.setBackgroundResource(R.drawable.bg_power_button_off);
-                binding.viewGlowRing.setVisibility(View.GONE);
+                binding.btnPower.setImageTintList(ColorStateList.valueOf(ctx.getColor(R.color.power_off_icon)));
+                applyButtonShadow(ctx, 10f, R.color.power_off_shadow);
+                stopGlowPulse();
                 binding.tvProtectionStatus.setText(R.string.status_inactive);
                 binding.tvProtectionStatus.setBackgroundResource(R.drawable.bg_badge_warning);
                 binding.tvProtectionStatus.setTextColor(ctx.getColor(R.color.status_warning));
-                binding.tvProtectionUptime.setText("Tap below to activate system-wide protection");
-
-                binding.btnToggleProtection.setText("Turn on protection");
-                binding.btnToggleProtection.setIconResource(R.drawable.ic_shield_check);
-                binding.btnToggleProtection.setBackgroundColor(ctx.getColor(R.color.brand_secondary));
-                binding.btnToggleProtection.setStrokeWidth(0);
-                binding.btnToggleProtection.setTextColor(Color.parseColor("#0B1220"));
-                binding.btnToggleProtection.setIconTint(ColorStateList.valueOf(Color.parseColor("#0B1220")));
+                binding.tvProtectionUptime.setText("Tap to turn on");
                 break;
         }
+    }
+
+    /** Soft lift under the power button; tinted to the button's colour on Android 9+. */
+    private void applyButtonShadow(Context ctx, float elevationDp, int colorRes) {
+        binding.btnPower.setElevation(elevationDp * ctx.getResources().getDisplayMetrics().density);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+            int color = ctx.getColor(colorRes);
+            binding.btnPower.setOutlineSpotShadowColor(color);
+            binding.btnPower.setOutlineAmbientShadowColor(color);
+        }
+    }
+
+    /** Slow "breathing" glow behind the button while protection is on. */
+    private void startGlowPulse() {
+        View glow = binding.viewGlowRing;
+        if (glow.getVisibility() == View.VISIBLE && glowPulse != null) return;
+        glow.setVisibility(View.VISIBLE);
+        glowPulse = android.animation.ObjectAnimator.ofPropertyValuesHolder(glow,
+                android.animation.PropertyValuesHolder.ofFloat(View.SCALE_X, 0.88f, 1.05f),
+                android.animation.PropertyValuesHolder.ofFloat(View.SCALE_Y, 0.88f, 1.05f),
+                android.animation.PropertyValuesHolder.ofFloat(View.ALPHA, 1f, 0.55f));
+        glowPulse.setDuration(1600);
+        glowPulse.setRepeatMode(android.animation.ValueAnimator.REVERSE);
+        glowPulse.setRepeatCount(android.animation.ValueAnimator.INFINITE);
+        glowPulse.setInterpolator(new android.view.animation.AccelerateDecelerateInterpolator());
+        glowPulse.start();
+    }
+
+    private void stopGlowPulse() {
+        if (glowPulse != null) {
+            glowPulse.cancel();
+            glowPulse = null;
+        }
+        binding.viewGlowRing.setVisibility(View.GONE);
+    }
+
+    private void updateUptimeText() {
+        Long start = AdShieldVpnService.getProtectionStartTimeMillis();
+        if (start == null) {
+            binding.tvProtectionUptime.setText("Tap to turn off");
+            return;
+        }
+        long elapsedSec = (System.currentTimeMillis() - start) / 1000L;
+        binding.tvProtectionUptime.setText(String.format(Locale.US, "On for %02d:%02d:%02d · Tap to turn off",
+                elapsedSec / 3600, (elapsedSec % 3600) / 60, elapsedSec % 60));
     }
 
     public void refreshStats() {
@@ -179,29 +223,6 @@ public class DashboardFragment extends Fragment {
 
         long[] today = dbHelper.getTodayCounts();
         binding.tvStatToday.setText(String.format(Locale.US, "%,d", today[1]));
-
-        // Upstream DNS display
-        String dnsKey = prefsManager.getDnsProvider();
-        String dnsName = "Cloudflare (1.1.1.1)";
-        if ("google".equalsIgnoreCase(dnsKey)) {
-            dnsName = "Google (8.8.8.8)";
-        } else if ("quad9".equalsIgnoreCase(dnsKey)) {
-            dnsName = "Quad9 (9.9.9.9)";
-        } else if ("adguard".equalsIgnoreCase(dnsKey)) {
-            dnsName = "AdGuard (94.140.14.14)";
-        }
-        binding.tvDnsIndicator.setText("DNS: " + dnsName);
-
-        // Load recent blocked requests (up to 4)
-        List<DnsLogEntry> recentBlocked = dbHelper.getRecentLogs(4, null, true);
-        if (recentBlocked.isEmpty()) {
-            binding.tvNoThreats.setVisibility(View.VISIBLE);
-            binding.recyclerRecentBlocked.setVisibility(View.GONE);
-        } else {
-            binding.tvNoThreats.setVisibility(View.GONE);
-            binding.recyclerRecentBlocked.setVisibility(View.VISIBLE);
-            recentBlockedAdapter.setItems(recentBlocked);
-        }
     }
 
     private void startUptimeTicker() {
@@ -211,15 +232,7 @@ public class DashboardFragment extends Fragment {
                 if (binding != null) {
                     VpnState state = AdShieldVpnService.getVpnStateLiveData().getValue();
                     if (state == VpnState.CONNECTED) {
-                        Long start = AdShieldVpnService.getProtectionStartTimeMillis();
-                        if (start != null) {
-                            long elapsedSec = (System.currentTimeMillis() - start) / 1000L;
-                            long hours = elapsedSec / 3600;
-                            long minutes = (elapsedSec % 3600) / 60;
-                            long seconds = elapsedSec % 60;
-                            binding.tvProtectionUptime.setText(String.format(Locale.US,
-                                    "Active for %02d:%02d:%02d • Filtering Active", hours, minutes, seconds));
-                        }
+                        updateUptimeText();
                     }
                 }
                 uptimeHandler.postDelayed(this, 1000L);
@@ -232,12 +245,17 @@ public class DashboardFragment extends Fragment {
     public void onResume() {
         super.onResume();
         refreshStats();
+        updatePrivateDnsWarning();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         uptimeHandler.removeCallbacks(uptimeRunnable);
+        if (glowPulse != null) {
+            glowPulse.cancel();
+            glowPulse = null;
+        }
         binding = null;
     }
 }

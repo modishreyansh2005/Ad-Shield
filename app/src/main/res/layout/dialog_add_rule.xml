@@ -10,7 +10,7 @@
         android:id="@+id/dialog_rule_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Add Filter Rule"
+        android:text="Add website"
         android:textColor="?attr/theme_text_primary"
         android:textSize="18sp"
         android:textStyle="bold" />
@@ -19,7 +19,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="Enter a fully qualified domain name (e.g., ads.example.com)"
+        android:text="Type the website address, for example ads.example.com"
         android:textColor="?attr/theme_text_muted"
         android:textSize="12sp" />
 

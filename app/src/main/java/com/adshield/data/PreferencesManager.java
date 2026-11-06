@@ -28,9 +28,7 @@ public class PreferencesManager {
     private static final String KEY_YOUTUBE_BLOCKED_COUNT = "key_yt_blocked_count";
     private static final String KEY_SPOTIFY_BLOCKED_COUNT = "key_sp_blocked_count";
     private static final String KEY_HOTSTAR_BLOCKED_COUNT = "key_hotstar_blocked_count";
-    private static final String KEY_AUTO_SKIPPER_ENABLED = "key_auto_skipper_enabled";
     private static final String KEY_AUTO_MUTE_ADS_ENABLED = "key_auto_mute_ads_enabled";
-    private static final String KEY_AUTO_SKIPPED_ADS_COUNT = "key_auto_skipped_ads_count";
     private static final String KEY_AD_BLOCKER_ENABLED = "key_ad_blocker_enabled";
     private static final String KEY_TRACKER_SHIELD_ENABLED = "key_tracker_shield_enabled";
 
@@ -130,6 +128,21 @@ public class PreferencesManager {
         prefs.edit().putString(KEY_DNS_PROVIDER, provider).apply();
     }
 
+    /** Primary and secondary upstream resolver IPs for the selected provider. */
+    public String[] getUpstreamDnsServers() {
+        switch (getDnsProvider().toLowerCase(java.util.Locale.US)) {
+            case "google":
+                return new String[]{"8.8.8.8", "8.8.4.4"};
+            case "quad9":
+                return new String[]{"9.9.9.9", "149.112.112.112"};
+            case "adguard":
+                return new String[]{"94.140.14.14", "94.140.15.15"};
+            case "cloudflare":
+            default:
+                return new String[]{"1.1.1.1", "1.0.0.1"};
+        }
+    }
+
     public String getCustomDns() {
         return prefs.getString(KEY_CUSTOM_DNS, "1.1.1.1");
     }
@@ -197,14 +210,6 @@ public class PreferencesManager {
         prefs.edit().putLong(KEY_HOTSTAR_BLOCKED_COUNT, current + 1).apply();
     }
 
-    public boolean isAutoSkipperEnabled() {
-        return prefs.getBoolean(KEY_AUTO_SKIPPER_ENABLED, true);
-    }
-
-    public void setAutoSkipperEnabled(boolean enabled) {
-        prefs.edit().putBoolean(KEY_AUTO_SKIPPER_ENABLED, enabled).apply();
-    }
-
     public boolean isAutoMuteAdsEnabled() {
         return prefs.getBoolean(KEY_AUTO_MUTE_ADS_ENABLED, true);
     }
@@ -213,31 +218,30 @@ public class PreferencesManager {
         prefs.edit().putBoolean(KEY_AUTO_MUTE_ADS_ENABLED, enabled).apply();
     }
 
-    public long getAutoSkippedAdsCount() {
-        return prefs.getLong(KEY_AUTO_SKIPPED_ADS_COUNT, 0L);
-    }
-
-    public void incrementAutoSkippedAdsCount() {
-        long current = getAutoSkippedAdsCount();
-        prefs.edit().putLong(KEY_AUTO_SKIPPED_ADS_COUNT, current + 1).apply();
-    }
-
-    public static boolean isAccessibilityServiceRunning(Context context) {
-        if (context == null) return false;
-        String expectedService = context.getPackageName() + "/com.adshield.service.AdShieldAccessibilityService";
-        String enabledServices = android.provider.Settings.Secure.getString(
-                context.getContentResolver(),
-                android.provider.Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
-        if (enabledServices == null) return false;
-        android.text.TextUtils.SimpleStringSplitter colonSplitter = new android.text.TextUtils.SimpleStringSplitter(':');
-        colonSplitter.setString(enabledServices);
-        while (colonSplitter.hasNext()) {
-            String componentNameString = colonSplitter.next();
-            if (expectedService.equalsIgnoreCase(componentNameString)) {
-                return true;
+    /**
+     * Returns the Private DNS hostname when Android is in strict ("hostname") Private DNS mode,
+     * otherwise null. In strict mode DNS goes straight to that server over TLS and bypasses AdShield.
+     */
+    public static String getStrictPrivateDnsHost(Context context) {
+        if (context == null || android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.P) return null;
+        try {
+            String mode = android.provider.Settings.Global.getString(context.getContentResolver(), "private_dns_mode");
+            if ("hostname".equals(mode)) {
+                String host = android.provider.Settings.Global.getString(context.getContentResolver(), "private_dns_specifier");
+                return (host != null && !host.isEmpty()) ? host : "custom provider";
             }
-        }
-        return false;
+
+            // Fallback for devices that hide the setting: inspect live network properties
+            android.net.ConnectivityManager cm = context.getSystemService(android.net.ConnectivityManager.class);
+            if (cm == null) return null;
+            for (android.net.Network network : cm.getAllNetworks()) {
+                android.net.LinkProperties lp = cm.getLinkProperties(network);
+                if (lp != null && lp.getPrivateDnsServerName() != null) {
+                    return lp.getPrivateDnsServerName();
+                }
+            }
+        } catch (Exception ignored) {}
+        return null;
     }
 
     public void resetStatistics() {
@@ -247,7 +251,6 @@ public class PreferencesManager {
                 .putLong(KEY_YOUTUBE_BLOCKED_COUNT, 0L)
                 .putLong(KEY_SPOTIFY_BLOCKED_COUNT, 0L)
                 .putLong(KEY_HOTSTAR_BLOCKED_COUNT, 0L)
-                .putLong(KEY_AUTO_SKIPPED_ADS_COUNT, 0L)
                 .apply();
     }
 }

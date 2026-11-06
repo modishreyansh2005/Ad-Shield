@@ -25,7 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="System configuration and filtering rules"
+            android:text="Choose how AdShield works"
             android:textColor="?attr/theme_text_muted"
             android:textSize="12sp" />
 
@@ -101,7 +101,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="22dp"
             android:letterSpacing="0.05"
-            android:text="NETWORK &amp; UPSTREAM DNS"
+            android:text="ADVANCED"
             android:textColor="@color/brand_primary"
             android:textSize="12sp"
             android:textStyle="bold" />
@@ -146,7 +146,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:text="Cloudflare DNS (1.1.1.1)"
+                        android:text="Cloudflare (recommended)"
                         android:textColor="?attr/theme_text_muted"
                         android:textSize="12sp" />
                 </LinearLayout>
@@ -167,7 +167,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="22dp"
             android:letterSpacing="0.05"
-            android:text="SPECIALIZED STREAM FILTERING"
+            android:text="YOUTUBE &amp; SPOTIFY"
             android:textColor="@color/brand_primary"
             android:textSize="12sp"
             android:textStyle="bold" />
@@ -215,7 +215,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:text="Filter ad/tracking telemetry endpoints"
+                        android:text="Block YouTube ad trackers"
                         android:textColor="?attr/theme_text_muted"
                         android:textSize="12sp" />
                 </LinearLayout>
@@ -271,7 +271,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:text="Filter ad audio/companion requests"
+                        android:text="Block Spotify ad trackers"
                         android:textColor="?attr/theme_text_muted"
                         android:textSize="12sp" />
                 </LinearLayout>
@@ -284,72 +284,16 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Video Ad Auto-Skipper (Optional Accessibility Automation) -->
+        <!-- Ad Mute for official apps (media sessions via notification access + Spotify broadcasts) -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="22dp"
             android:letterSpacing="0.05"
-            android:text="VIDEO AD AUTO-SKIPPER (ACCESSIBILITY)"
+            android:text="MUTE ADS"
             android:textColor="@color/brand_primary"
             android:textSize="12sp"
             android:textStyle="bold" />
-
-        <!-- Auto-Skipper Switch Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:cardBackgroundColor="?attr/theme_card"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0.5dp"
-            app:strokeColor="?attr/theme_border"
-            app:strokeWidth="1dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="16dp">
-
-                <ImageView
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:src="@drawable/ic_shield_check"
-                    app:tint="@color/brand_primary" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="14dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/outside_skipper_title"
-                        android:textColor="?attr/theme_text_primary"
-                        android:textSize="15sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="@string/outside_skipper_desc"
-                        android:textColor="?attr/theme_text_muted"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/switch_auto_skipper"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
 
         <!-- Instant Ad Mute Switch Card -->
         <com.google.android.material.card.MaterialCardView
@@ -407,9 +351,9 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Accessibility Service Permission Card -->
+        <!-- Notification Access Permission Card -->
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/card_accessibility_settings"
+            android:id="@+id/card_notification_access"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -438,24 +382,33 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="System Accessibility Permission"
+                        android:text="@string/notification_access_title"
                         android:textColor="?attr/theme_text_primary"
                         android:textSize="15sp"
                         android:textStyle="bold" />
 
                     <TextView
-                        android:id="@+id/tv_accessibility_service_status"
+                        android:id="@+id/tv_notification_access_status"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
                         android:text="Checking status..."
                         android:textColor="?attr/theme_text_muted"
                         android:textSize="12sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="@string/notification_access_desc"
+                        android:textColor="?attr/theme_text_muted"
+                        android:textSize="11sp" />
                 </LinearLayout>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
                     android:text="Open &gt;"
                     android:textColor="@color/brand_primary"
                     android:textSize="13sp"
@@ -480,7 +433,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Reset Protection Statistics"
+            android:text="Reset counters"
             android:textColor="@color/status_blocked" />
 
         <!-- About Section -->
@@ -505,7 +458,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="100% Native Java • Local DNS Engine • Zero Data Collection • No Root Required"
+            android:text="Works on your phone • No account needed • We collect no data"
             android:textColor="?attr/theme_text_muted"
             android:textSize="12sp" />
 

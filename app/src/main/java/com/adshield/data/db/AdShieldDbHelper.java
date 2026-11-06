@@ -11,6 +11,7 @@ import com.adshield.data.model.FilterRule;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AdShieldDbHelper extends SQLiteOpenHelper {
 
@@ -26,6 +28,9 @@ public class AdShieldDbHelper extends SQLiteOpenHelper {
     private static final int MAX_LOG_RECORDS = 1000;
 
     private static volatile AdShieldDbHelper instance;
+
+    // Active rule domains are read on every DNS query, so keep them in memory until rules change
+    private final Map<FilterRule.Type, Set<String>> activeRuleCache = new ConcurrentHashMap<>();
 
     public static synchronized AdShieldDbHelper getInstance(Context context) {
         if (instance == null) {
@@ -156,13 +161,16 @@ public class AdShieldDbHelper extends SQLiteOpenHelper {
         cv.put("created_at", System.currentTimeMillis());
 
         long res = db.insertWithOnConflict("custom_rules", null, cv, SQLiteDatabase.CONFLICT_REPLACE);
+        activeRuleCache.clear();
         return res != -1;
     }
 
     public synchronized boolean deleteRule(String domain) {
         if (domain == null) return false;
         SQLiteDatabase db = getWritableDatabase();
-        return db.delete("custom_rules", "domain = ?", new String[]{domain.trim().toLowerCase(Locale.US)}) > 0;
+        boolean deleted = db.delete("custom_rules", "domain = ?", new String[]{domain.trim().toLowerCase(Locale.US)}) > 0;
+        activeRuleCache.clear();
+        return deleted;
     }
 
     public synchronized void setRuleEnabled(String domain, boolean enabled) {
@@ -170,6 +178,7 @@ public class AdShieldDbHelper extends SQLiteOpenHelper {
         ContentValues cv = new ContentValues();
         cv.put("is_enabled", enabled ? 1 : 0);
         db.update("custom_rules", cv, "domain = ?", new String[]{domain.trim().toLowerCase(Locale.US)});
+        activeRuleCache.clear();
     }
 
     public synchronized List<FilterRule> getRules(FilterRule.Type type) {
@@ -192,7 +201,13 @@ public class AdShieldDbHelper extends SQLiteOpenHelper {
         return list;
     }
 
-    public synchronized Set<String> getActiveRuleDomains(FilterRule.Type type) {
+    public Set<String> getActiveRuleDomains(FilterRule.Type type) {
+        Set<String> cached = activeRuleCache.get(type);
+        if (cached != null) return cached;
+        return loadActiveRuleDomains(type);
+    }
+
+    private synchronized Set<String> loadActiveRuleDomains(FilterRule.Type type) {
         Set<String> set = new HashSet<>();
         SQLiteDatabase db = getReadableDatabase();
         try (Cursor cursor = db.query("custom_rules",
@@ -203,7 +218,10 @@ public class AdShieldDbHelper extends SQLiteOpenHelper {
                 set.add(cursor.getString(0));
             }
         }
-        return set;
+        Set<String> loaded = Collections.unmodifiableSet(set);
+        // Cached inside the lock so a concurrent rule change can't be overwritten by a stale load
+        activeRuleCache.put(type, loaded);
+        return loaded;
     }
 
     // ==========================================

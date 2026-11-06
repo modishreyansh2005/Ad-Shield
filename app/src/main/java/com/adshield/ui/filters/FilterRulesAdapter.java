@@ -75,7 +75,7 @@ public class FilterRulesAdapter extends RecyclerView.Adapter<FilterRulesAdapter.
             binding.tvRuleDomain.setText(rule.getDomain());
 
             if (isReadOnly) {
-                binding.tvRuleDate.setText("Built-in Community Security Rule");
+                binding.tvRuleDate.setText("Built into AdShield");
                 binding.btnDeleteRule.setVisibility(View.GONE);
                 binding.switchRuleEnabled.setVisibility(View.GONE);
             } else {

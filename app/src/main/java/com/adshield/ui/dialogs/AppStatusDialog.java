@@ -67,21 +67,23 @@ public class AppStatusDialog extends DialogFragment {
 
         if (target == AppTarget.YOUTUBE) {
             binding.dialogAppIcon.setImageResource(R.drawable.ic_youtube);
-            binding.dialogAppTitle.setText("YouTube Ad Shield");
+            binding.dialogAppTitle.setText("YouTube");
             long blocked = prefs.getYouTubeBlockedCount();
-            binding.dialogAppBlockedCount.setText(String.format(Locale.US, "%,d Requests Sinkholed", blocked));
+            binding.dialogAppBlockedCount.setText(String.format(Locale.US, "%,d blocked", blocked));
             binding.dialogAppDescription.setText(
-                    "AdShield filters advertising, telemetry, and tracking endpoints (such as doubleclick.net, googlesyndication.com, adservice.google.com, imasdk.googleapis.com) at the DNS level.\n\n" +
-                    "To prevent video playback interruptions, legitimate media streams (googlevideo.com) and core login services are intentionally preserved."
+                    "AdShield blocks YouTube's ad trackers and mutes video ads in the YouTube app.\n\n" +
+                    "Video ads still appear in the YouTube app, because they come from the same place as the videos. " +
+                    "To watch with no ads at all, use \"Watch without ads in AdShield\" below."
             );
         } else {
             binding.dialogAppIcon.setImageResource(R.drawable.ic_spotify);
-            binding.dialogAppTitle.setText("Spotify Ad Shield");
+            binding.dialogAppTitle.setText("Spotify");
             long blocked = prefs.getSpotifyBlockedCount();
-            binding.dialogAppBlockedCount.setText(String.format(Locale.US, "%,d Requests Sinkholed", blocked));
+            binding.dialogAppBlockedCount.setText(String.format(Locale.US, "%,d blocked", blocked));
             binding.dialogAppDescription.setText(
-                    "AdShield blocks Spotify audio ad telemetry and companion banner ad servers locally at the DNS level.\n\n" +
-                    "Essential media streaming CDN servers (audio-*.spotify.com) and account login services remain fully whitelisted so playback never freezes."
+                    "AdShield blocks Spotify's ad trackers and mutes audio ads, even when Spotify plays in the background.\n\n" +
+                    "For muting to work, open Spotify → Settings and turn on Device Broadcast Status. " +
+                    "Your music is never blocked."
             );
         }
 

@@ -1,16 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="oval">
-    <gradient
-        android:angle="135"
-        android:startColor="#34D399"
-        android:centerColor="#38BDF8"
-        android:endColor="#60A5FA"
-        android:type="linear" />
-    <size
-        android:width="128dp"
-        android:height="128dp" />
-    <stroke
-        android:width="4dp"
-        android:color="#A7F3D0" />
-</shape>
+<!-- "On" power button: light mint-green jewel with a glossy top highlight and a thin light rim -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Base: soft mint (top-left) to fresh emerald (bottom-right) -->
+    <item>
+        <shape android:shape="oval">
+            <gradient
+                android:angle="315"
+                android:startColor="#A7F3D0"
+                android:centerColor="#6EE7B7"
+                android:endColor="#10B981"
+                android:type="linear" />
+        </shape>
+    </item>
+
+    <!-- Glossy highlight on the upper half -->
+    <item
+        android:bottom="60dp"
+        android:left="18dp"
+        android:right="18dp"
+        android:top="6dp">
+        <shape android:shape="oval">
+            <gradient
+                android:angle="270"
+                android:startColor="#4DFFFFFF"
+                android:endColor="#00FFFFFF"
+                android:type="linear" />
+        </shape>
+    </item>
+
+    <!-- Thin light rim -->
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#00000000" />
+            <stroke
+                android:width="1.5dp"
+                android:color="#59FFFFFF" />
+        </shape>
+    </item>
+</layer-list>

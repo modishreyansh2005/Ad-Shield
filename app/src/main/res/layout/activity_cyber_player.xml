@@ -34,7 +34,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="CYBER STREAM HUB"
+                android:text="Ad-free player"
                 android:textColor="@color/cyber_text_primary"
                 android:textSize="14sp"
                 android:textStyle="bold" />
@@ -42,7 +42,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Brave Engine • 0-Ad Scriptlets Active"
+                android:text="Ads are removed while you watch"
                 android:textColor="@color/cyber_neon_green"
                 android:textSize="11sp" />
         </LinearLayout>
@@ -51,7 +51,7 @@
             android:id="@+id/chip_brave_shield_badge"
             android:layout_width="wrap_content"
             android:layout_height="32dp"
-            android:text="SHIELDS UP"
+            android:text="ON"
             android:textColor="@color/cyber_neon_green"
             android:textSize="10sp"
             android:textStyle="bold"
@@ -117,6 +117,22 @@
                 app:icon="@drawable/ic_spotify"
                 app:iconTint="#1DB954"
                 app:strokeColor="#1DB954"
+                app:strokeWidth="1dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_tab_ytmusic"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:layout_marginStart="8dp"
+                android:text="YT Music"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                app:backgroundTint="#20FF0000"
+                app:cornerRadius="19dp"
+                app:icon="@drawable/ic_youtube"
+                app:iconTint="#FF0000"
+                app:strokeColor="#FF0000"
                 app:strokeWidth="1dp" />
         </LinearLayout>
     </HorizontalScrollView>
